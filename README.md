@@ -19,7 +19,7 @@ En resumen:
 
 ## 📦 Instalación de dependencias
 
-Desde la raíz del proyecto o desde el directorio correspondiente:
+Desde la raíz del proyecto:
 
 ```bash
 pip install -r requirements.txt
