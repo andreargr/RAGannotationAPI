@@ -113,7 +113,7 @@ class Neo4jManager:
     #     )
 
 
-def get_ontology_list(directory="../core-ontologies-siemensenergy"):
+def get_ontology_list(directory="./ontologies"):
     dir_path = Path(directory)
     extensions = ["*.ttl", "*.owl", "*.rdf", "*.xml"]
 
@@ -284,10 +284,10 @@ def process_ontology (dataset, neo4j_url, neo4j_user, neo4j_pwd):
         classes_summary = extract_all_classes(graph)  # extract ontology summary
         summary_text = summary_to_text(classes_summary)  # convert it to text to improve the quality of embeddings
 
-        summary_path = f"{NEO4J_SUMMARY_FOLDER}/{id}.json"
-
-        with open(summary_path, "w", encoding="utf-8") as file:
-            json.dump(classes_summary, file, indent=2, ensure_ascii=False)
+        # summary_path = f"{NEO4J_SUMMARY_FOLDER}/{id}.json"
+        #
+        # with open(summary_path, "w", encoding="utf-8") as file:
+        #     json.dump(classes_summary, file, indent=2, ensure_ascii=False)
 
         embedding = manager.embedding_model.encode(summary_text,
                 normalize_embeddings=True).tolist() # get embeddings
