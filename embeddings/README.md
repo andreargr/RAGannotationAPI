@@ -28,7 +28,7 @@ Contraseña: password123
 
 ### 2. Entorno Python
 
-Se recomienda usar versión Python **3.10**.
+Usar versión Python **3.10**.
 
 Dependencias principales:
 
