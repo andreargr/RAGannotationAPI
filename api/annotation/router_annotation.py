@@ -75,7 +75,7 @@ async def column_annotation(
                 "to return per input entity (1–10)."
         )
     ),
-    ontology_ids: Optional[str] = Form(None, description="Comma-separated list of ontology OLS IDs to use for annotation."),
+    ontology_ids: Optional[str] = Form("", description="Comma-separated list of ontology OLS IDs to use for annotation."),
     top_n: Optional[int] = Form(2, description="Number of top ontologies to return. 0 means return all."),
     score_threshold: confloat(ge=0.1, le=1.0) = Form(
         0.5,
@@ -207,7 +207,7 @@ async def column_annotation(
 @router.post("/rows")
 async def row_annotation(
     file: UploadFile = File(..., description="CSV or Excel file with the columns to be annotated."),
-    column_name: str = Form(..., description="Name of the column whose rows should be annotated."),
+    column_name: str = Form(..., description="Name of the column whose rows should be annotated.",examples="column_name"),
     top_class_per_entity: conint(ge=1, le=10) = Form(
         1,
         description=(
@@ -258,9 +258,25 @@ async def row_annotation(
         raise HTTPException(status_code=400, detail=f"Error reading file: {str(e)}")
 
     # column validation
+    # Normalize input
+    column_name = column_name.strip()
+
+    # 1️⃣ Empty column name
+    if not column_name:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Parameter 'column_name' must not be empty."
+        )
+
+    # 2️⃣ Column does not exist
     if column_name not in df.columns:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Column '{column_name}' not found in dataset.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "error": f"Column '{column_name}' not found in dataset.",
+                "available_columns": list(df.columns)
+            }
+        )
 
     values_str = ",".join(df[column_name].astype(str))
     entities = parse_free_text_entities(values_str)
