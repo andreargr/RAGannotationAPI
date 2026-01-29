@@ -1,0 +1,686 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://infohub.siemens-energy.com/cdm#"
+     xml:base="http://infohub.siemens-energy.com/cdm"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:ns="http://www.w3.org/2003/06/sw-vocab-status/ns#"
+     xmlns:obo="http://purl.obolibrary.org/obo/"
+     xmlns:org="http://www.w3.org/ns/org#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:pav="http://purl.org/pav/"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdl="http://rds.posccaesar.org/ontology/lis14/rdl/"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:dcat="http://www.w3.org/ns/dcat#"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:om-2="http://www.ontology-of-units-of-measure.org/resource/om-2/"
+     xmlns:prov="http://www.w3.org/ns/prov#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:terms="http://purl.org/dc/terms/"
+     xmlns:schema="http://schema.org/"
+     xmlns:example="http://example.org/"
+     xmlns:metadata="http://data.bioontology.org/metadata/"
+     xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#"
+     xmlns:AnnotationVocabulary="https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/"
+     xmlns:CommonCoreOntologies="http://www.ontologyrepository.com/CommonCoreOntologies/">
+    <owl:Ontology rdf:about="http://infohub.siemens-energy.com/cdm">
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/address"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/datasets"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/equipment"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/identifiers"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/kks"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/logistics"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/organizations"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/physical_props"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/projects"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/top-props"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/typecode"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/Country/1.0"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://infohub.siemens-energy.com/kks#hasKKSCodePart -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/kks#hasKKSCodePart">
+        <rdfs:subPropertyOf rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/hasPart"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/props#hasComponent -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/props#hasComponent">
+        <rdfs:subPropertyOf rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/hasPart"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/props#hasParticipant -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/props#hasParticipant">
+        <owl:equivalentProperty rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/hasParticipant"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/props#isAbout -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/props#isAbout">
+        <owl:equivalentProperty rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/isAbout"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/props#isParticipantOf -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/props#isParticipantOf">
+        <owl:equivalentProperty rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/participantIn"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/biotop/btl2.owl#hasPart -->
+
+    <rdf:Description rdf:about="http://purl.org/biotop/btl2.owl#hasPart">
+        <owl:equivalentProperty rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/hasPart"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM -->
+
+    <owl:ObjectProperty rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/datumUOM">
+        <owl:equivalentProperty rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/hasPart -->
+
+    <owl:ObjectProperty rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/hasPart"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/hasParticipant -->
+
+    <owl:ObjectProperty rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/hasParticipant"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/isAbout -->
+
+    <owl:ObjectProperty rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/isAbout"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/participantIn -->
+
+    <owl:ObjectProperty rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/participantIn"/>
+    
+
+
+    <!-- http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit -->
+
+    <rdf:Description rdf:about="http://www.ontology-of-units-of-measure.org/resource/om-2/hasUnit"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/datumValue -->
+
+    <owl:DatatypeProperty rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/datumValue">
+        <rdfs:subPropertyOf rdf:resource="http://purl.org/biotop/btl2.owl#hasValue"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://infohub.siemens-energy.com/cdm#FunctionalObject -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/cdm#FunctionalObject">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject"/>
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Object"/>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/cdm#Location -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/cdm#Location">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/Location"/>
+        <rdfs:label>location</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/cdm#Object -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/cdm#Object">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/Object"/>
+        <rdfs:label>object</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/cdm#PhysicalObject -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/cdm#PhysicalObject">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject"/>
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Object"/>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/cdm#QuantityDatum -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/cdm#QuantityDatum">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/QuantityDatum"/>
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+        <rdfs:label>quantity datum</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/cdm#RealizableEntity -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/cdm#RealizableEntity">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity"/>
+        <rdfs:label>realizable entity</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/cdm#Site -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/cdm#Site">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/Site"/>
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Location"/>
+        <rdfs:label>site</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/energy/shared/document/domain/0.3#Document -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/energy/shared/document/domain/0.3#Document">
+        <owl:equivalentClass rdf:resource="http://ontology.siemens.com/base/foundation/information-entity#Document"/>
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/energy/transmission/blade-zone-ontology/domain/0.1#Distribution -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/energy/transmission/blade-zone-ontology/domain/0.1#Distribution">
+        <owl:equivalentClass rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/energy/transmission/logistics-/domain/0.1#Contract -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/energy/transmission/logistics-/domain/0.1#Contract">
+        <owl:equivalentClass rdf:resource="https://spec.edmcouncil.org/fibo/ontology/FND/Agreements/Contracts/Contract"/>
+        <rdfs:subClassOf rdf:resource="https://spec.edmcouncil.org/fibo/ontology/FND/Agreements/Agreements/Agreement"/>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/identifiers#ComplexIdentifier -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/identifiers#ComplexIdentifier">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/kks#KKSCodePart -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/kks#KKSCodePart">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#LogisticData -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/logistics#LogisticData">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#TransportType -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/logistics#TransportType">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/projects#Schedule -->
+
+    <rdf:Description rdf:about="http://infohub.siemens-energy.com/projects#Schedule">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://linked.data.gov.au/def/project#Project -->
+
+    <rdf:Description rdf:about="http://linked.data.gov.au/def/project#Project">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/sdo/rdl/Project"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://ontology.siemens.com/base/foundation/information-entity#Document -->
+
+    <owl:Class rdf:about="http://ontology.siemens.com/base/foundation/information-entity#Document">
+        <owl:equivalentClass rdf:resource="http://purl.obolibrary.org/obo/IAO_0000310"/>
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/BFO_0000006 -->
+
+    <rdf:Description rdf:about="http://purl.obolibrary.org/obo/BFO_0000006">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/SpatialLocation"/>
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Location"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000310 -->
+
+    <rdf:Description rdf:about="http://purl.obolibrary.org/obo/IAO_0000310">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://purl.org/biotop/btl2.owl#Disposition -->
+
+    <owl:Class rdf:about="http://purl.org/biotop/btl2.owl#Disposition">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/Disposition"/>
+        <rdfs:label>disposition</rdfs:label>
+        <skos:definition>A disposition is a realizable entity. 
+Its manifestation is a process its bearer is involved in virtue of the bearer&apos;s physical make-up.</skos:definition>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.org/biotop/btl2.owl#InformationObject -->
+
+    <owl:Class rdf:about="http://purl.org/biotop/btl2.owl#InformationObject">
+        <owl:equivalentClass rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject"/>
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Object"/>
+        <rdfs:label>information object</rdfs:label>
+        <skos:definition>Piece of information (not necessarily human) , as it exists independently of any potential material carrier.</skos:definition>
+    </owl:Class>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/Activity -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/Activity">
+        <owl:equivalentClass rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/Disposition -->
+
+    <rdf:Description rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/Disposition"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject -->
+
+    <rdf:Description rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject -->
+
+    <rdf:Description rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/Location -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/Location"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/Object -->
+
+    <rdf:Description rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/Object"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/Organization -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/Organization">
+        <owl:equivalentClass rdf:resource="http://www.w3.org/ns/org#Organization"/>
+    </owl:Class>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/Person -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/Person">
+        <owl:equivalentClass rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+    </owl:Class>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject -->
+
+    <rdf:Description rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalQuantity -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalQuantity">
+        <owl:equivalentClass rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/Quantity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/PointInSpace -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/PointInSpace">
+        <owl:equivalentClass rdf:resource="http://www.ontologyrepository.com/CommonCoreOntologies/ThreeDimensionalPosition"/>
+    </owl:Class>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/QuantityDatum -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/QuantityDatum"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/ScalarQuantityDatum -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/ScalarQuantityDatum">
+        <owl:equivalentClass rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/Measure"/>
+    </owl:Class>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/Site -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/Site"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/SpatialLocation -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/SpatialLocation"/>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/lis14/rdl/UnitOfMeasure -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/lis14/rdl/UnitOfMeasure">
+        <owl:equivalentClass rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/Unit"/>
+    </owl:Class>
+    
+
+
+    <!-- http://rds.posccaesar.org/ontology/sdo/rdl/Project -->
+
+    <owl:Class rdf:about="http://rds.posccaesar.org/ontology/sdo/rdl/Project">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontology-of-units-of-measure.org/resource/om-2/Measure -->
+
+    <rdf:Description rdf:about="http://www.ontology-of-units-of-measure.org/resource/om-2/Measure">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#QuantityDatum"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.ontology-of-units-of-measure.org/resource/om-2/Quantity -->
+
+    <rdf:Description rdf:about="http://www.ontology-of-units-of-measure.org/resource/om-2/Quantity"/>
+    
+
+
+    <!-- http://www.ontology-of-units-of-measure.org/resource/om-2/Unit -->
+
+    <rdf:Description rdf:about="http://www.ontology-of-units-of-measure.org/resource/om-2/Unit">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.ontologyrepository.com/CommonCoreOntologies/ThreeDimensionalPosition -->
+
+    <rdf:Description rdf:about="http://www.ontologyrepository.com/CommonCoreOntologies/ThreeDimensionalPosition"/>
+    
+
+
+    <!-- http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility -->
+
+    <rdf:Description rdf:about="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Site"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/2004/02/skos/core#Collection -->
+
+    <owl:Class rdf:about="http://www.w3.org/2004/02/skos/core#Collection"/>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#DataService -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/dcat#DataService">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Dataset -->
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/dcat#Dataset">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/dcat#Resource"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/dcat#Distribution -->
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/dcat#Distribution">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/org#Membership -->
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/org#Membership">
+        <rdfs:subClassOf rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/org#Organization -->
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/org#Organization"/>
+    
+
+
+    <!-- http://www.w3.org/ns/org#Post -->
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/org#Post">
+        <rdfs:subClassOf rdf:resource="http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/org#Site -->
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/org#Site">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Site"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Activity -->
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/prov#Activity"/>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Agent -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Agent">
+        <owl:equivalentClass rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Object"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Collection -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/prov#Collection">
+        <owl:equivalentClass rdf:resource="https://w3id.org/rec/core/Collection"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Influence -->
+
+    <rdf:Description rdf:about="http://www.w3.org/ns/prov#Influence">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://xmlns.com/foaf/0.1/Agent -->
+
+    <rdf:Description rdf:about="http://xmlns.com/foaf/0.1/Agent">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Object"/>
+    </rdf:Description>
+    
+
+
+    <!-- http://xmlns.com/foaf/0.1/Person -->
+
+    <rdf:Description rdf:about="http://xmlns.com/foaf/0.1/Person"/>
+    
+
+
+    <!-- https://linked.data.gov.au/def/project#SumOfMoney -->
+
+    <rdf:Description rdf:about="https://linked.data.gov.au/def/project#SumOfMoney">
+        <rdfs:subClassOf rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/Quantity"/>
+    </rdf:Description>
+    
+
+
+    <!-- https://schema.org/Place -->
+
+    <rdf:Description rdf:about="https://schema.org/Place">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/cdm#Site"/>
+    </rdf:Description>
+    
+
+
+    <!-- https://schema.org/PostalAddress -->
+
+    <rdf:Description rdf:about="https://schema.org/PostalAddress">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- https://spec.edmcouncil.org/fibo/ontology/FND/Agreements/Agreements/Agreement -->
+
+    <rdf:Description rdf:about="https://spec.edmcouncil.org/fibo/ontology/FND/Agreements/Agreements/Agreement">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- https://spec.edmcouncil.org/fibo/ontology/FND/Agreements/Contracts/Contract -->
+
+    <rdf:Description rdf:about="https://spec.edmcouncil.org/fibo/ontology/FND/Agreements/Contracts/Contract"/>
+    
+
+
+    <!-- https://w3id.org/eepsa/exn4eepsa#Forecast -->
+
+    <rdf:Description rdf:about="https://w3id.org/eepsa/exn4eepsa#Forecast">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#InformationObject"/>
+    </rdf:Description>
+    
+
+
+    <!-- https://w3id.org/rec/core/Capability -->
+
+    <rdf:Description rdf:about="https://w3id.org/rec/core/Capability">
+        <rdfs:subClassOf rdf:resource="http://purl.org/biotop/btl2.owl#Disposition"/>
+    </rdf:Description>
+    
+
+
+    <!-- https://w3id.org/rec/core/Collection -->
+
+    <rdf:Description rdf:about="https://w3id.org/rec/core/Collection"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+

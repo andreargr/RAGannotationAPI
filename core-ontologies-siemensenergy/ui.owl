@@ -1,0 +1,160 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://infohub.siemens-energy.com/ui#"
+     xml:base="http://infohub.siemens-energy.com/ui"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:ns="http://www.w3.org/2003/06/sw-vocab-status/ns#"
+     xmlns:ui="http://infohub.siemens-energy.com/ui#"
+     xmlns:org="http://www.w3.org/ns/org#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:dcat="http://www.w3.org/ns/dcat#"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:prov="http://www.w3.org/ns/prov#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:terms="http://purl.org/dc/terms/"
+     xmlns:schema="http://schema.org/">
+    <owl:Ontology rdf:about="http://infohub.siemens-energy.com/ui">
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/datasets"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#hasAssociatedClass -->
+
+    <owl:AnnotationProperty rdf:about="http://infohub.siemens-energy.com/ui#hasAssociatedClass">
+        <rdfs:comment>Links a UserInterfaceView with the domain class being represented.</rdfs:comment>
+        <rdfs:label>has associated class</rdfs:label>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#anyURI"/>
+        <rdfs:domain rdf:resource="http://infohub.siemens-energy.com/ui#UserInterfaceView"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#hasAssociatedRelation -->
+
+    <owl:AnnotationProperty rdf:about="http://infohub.siemens-energy.com/ui#hasAssociatedRelation">
+        <rdfs:label>has associated relation</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#hasColumnNumber -->
+
+    <owl:AnnotationProperty rdf:about="http://infohub.siemens-energy.com/ui#hasColumnNumber">
+        <rdfs:comment>Set the number of a UserInterfaceColumn to be displayed in the UI.</rdfs:comment>
+        <rdfs:label>has column number</rdfs:label>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#positiveInteger"/>
+        <rdfs:domain rdf:resource="http://infohub.siemens-energy.com/ui#UserInterfaceColumn"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#hasDatatype -->
+
+    <owl:AnnotationProperty rdf:about="http://infohub.siemens-energy.com/ui#hasDatatype">
+        <rdfs:comment>Specify the datatype for a UserInterfaceColumn.</rdfs:comment>
+        <rdfs:label>has datatype</rdfs:label>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#anyURI"/>
+        <rdfs:domain rdf:resource="http://infohub.siemens-energy.com/ui#UserInterfaceColumn"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#hasUserInterfaceColumn -->
+
+    <owl:AnnotationProperty rdf:about="http://infohub.siemens-energy.com/ui#hasUserInterfaceColumn">
+        <rdfs:comment>Links a user interface view with a column that will be displayed.</rdfs:comment>
+        <rdfs:label>has user interface column</rdfs:label>
+        <rdfs:range rdf:resource="http://infohub.siemens-energy.com/ui#UserInterfaceColumn"/>
+        <rdfs:domain rdf:resource="http://infohub.siemens-energy.com/ui#UserInterfaceView"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#hasUserInterfaceField -->
+
+    <owl:AnnotationProperty rdf:about="http://infohub.siemens-energy.com/ui#hasUserInterfaceField">
+        <rdfs:comment>Links a user interface view with a user interface field, which will be potentially drawn in the user interface.</rdfs:comment>
+        <rdfs:label>has user interface field</rdfs:label>
+        <rdfs:range rdf:resource="http://infohub.siemens-energy.com/ui#UserInterfaceField"/>
+        <rdfs:domain rdf:resource="http://infohub.siemens-energy.com/ui#UserInterfaceView"/>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#isDataProperty -->
+
+    <owl:AnnotationProperty rdf:about="http://infohub.siemens-energy.com/ui#isDataProperty">
+        <rdfs:comment>Indicates if a property is a data property or not.</rdfs:comment>
+        <rdfs:label>is data property</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#UserInterfaceColumn -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/ui#UserInterfaceColumn">
+        <rdfs:comment>Represent the column in which a UserInterfaceField will be displayed.
+
+A UserInterfaceColumn is linked to a field through the property &lt;http://infohub.siemens-energy.com/ui#hasUserInterfaceField&gt;, and it also contains the column number through the property &lt;http://infohub.siemens-energy.com/ui#hasColumnNumber&gt;.</rdfs:comment>
+        <rdfs:label>user interface column</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#UserInterfaceField -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/ui#UserInterfaceField">
+        <rdfs:comment>Represent a field of a domain entity to be represented in the user interface view.
+
+A UserInterfaceView should be linked through the property &lt;http://infohub.siemens-energy.com/ui#hasAssociatedRelation&gt;  to the concerning property from which the data from the domain entity can be extracted.
+
+Additionally, a flag indicating if the property is referring to a data property or not, and the datatype of the property should be linked through the properties &lt;http://infohub.siemens-energy.com/ui#isDataProperty&gt; and &lt;http://infohub.siemens-energy.com/ui#hasDataType&gt;, respectively.</rdfs:comment>
+        <rdfs:label>user interface field</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/ui#UserInterfaceView -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/ui#UserInterfaceView">
+        <rdfs:comment>An user interface view represents the fields that an entity has to be displayed in the user interface.
+
+A UserInterfaceView should be linked through the property &lt;http://infohub.siemens-energy.com/ui#hasAssociatedClass&gt; to the class being displayed.
+
+A UserInterfaceView should be linked to a set of UserInterfaceField instances through the property &lt;http://infohub.siemens-energy.com/ui#hasUserInterfaceField&gt;, which defines the properties of the associated class that has to be displayed.
+
+In addition, a UserInterfaceView should be linked to UserInterfaceColumn objects to define the columns appearing in the main view.</rdfs:comment>
+        <rdfs:label>user interface view</rdfs:label>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+

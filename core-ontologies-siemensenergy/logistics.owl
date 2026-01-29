@@ -1,0 +1,629 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://infohub.siemens-energy.com/logistics#"
+     xml:base="http://infohub.siemens-energy.com/logistics"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:ns="http://www.w3.org/2003/06/sw-vocab-status/ns#"
+     xmlns:obo="http://purl.obolibrary.org/obo/"
+     xmlns:org="http://www.w3.org/ns/org#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:om-2="http://www.ontology-of-units-of-measure.org/resource/om-2/"
+     xmlns:prov="http://www.w3.org/ns/prov#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:terms="http://purl.org/dc/terms/"
+     xmlns:example="http://example.org/"
+     xmlns:metadata="http://data.bioontology.org/metadata/"
+     xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#"
+     xmlns:CommonCoreOntologies="http://www.ontologyrepository.com/CommonCoreOntologies/">
+    <owl:Ontology rdf:about="http://infohub.siemens-energy.com/logistics">
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/equipment"/>
+        <owl:imports rdf:resource="http://infohub.siemens-energy.com/projects"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000111 -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.obolibrary.org/obo/IAO_0000111">
+        <obo:IAO_0000111 xml:lang="en">editor preferred term</obo:IAO_0000111>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000122"/>
+        <obo:IAO_0000115 xml:lang="en">The concise, meaningful, and human-friendly name for a class or property preferred by the ontology developers. (US-English)</obo:IAO_0000115>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Daniel Schober</obo:IAO_0000117>
+        <obo:IAO_0000119 xml:lang="en">GROUP:OBI:&lt;http://purl.obolibrary.org/obo/obi&gt;</obo:IAO_0000119>
+        <rdfs:isDefinedBy rdf:resource="http://purl.obolibrary.org/obo/iao.owl"/>
+        <rdfs:label xml:lang="en">editor preferred term</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000112 -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.obolibrary.org/obo/IAO_0000112">
+        <obo:IAO_0000111 xml:lang="en">example of usage</obo:IAO_0000111>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000122"/>
+        <obo:IAO_0000115 xml:lang="en">A phrase describing how a term should be used and/or a citation to a work which uses it. May also include other kinds of examples that facilitate immediate understanding, such as widely know prototypes or instances of a class, or cases where a relation is said to hold.</obo:IAO_0000115>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Daniel Schober</obo:IAO_0000117>
+        <obo:IAO_0000119 xml:lang="en">GROUP:OBI:&lt;http://purl.obolibrary.org/obo/obi&gt;</obo:IAO_0000119>
+        <rdfs:isDefinedBy rdf:resource="http://purl.obolibrary.org/obo/iao.owl"/>
+        <rdfs:label xml:lang="en">example of usage</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000114 -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.obolibrary.org/obo/IAO_0000114">
+        <obo:IAO_0000111 xml:lang="en">has curation status</obo:IAO_0000111>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Alan Ruttenberg</obo:IAO_0000117>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Bill Bug</obo:IAO_0000117>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Melanie Courtot</obo:IAO_0000117>
+        <rdfs:label xml:lang="en">has curation status</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000115 -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.obolibrary.org/obo/IAO_0000115">
+        <obo:IAO_0000111 xml:lang="en">definition</obo:IAO_0000111>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000122"/>
+        <obo:IAO_0000115 xml:lang="en">The official definition, explaining the meaning of a class or property. Shall be Aristotelian, formalized and normalized. Can be augmented with colloquial definitions.</obo:IAO_0000115>
+        <obo:IAO_0000116 xml:lang="en">2012-04-05: 
+Barry Smith
+
+The official OBI definition, explaining the meaning of a class or property: &apos;Shall be Aristotelian, formalized and normalized. Can be augmented with colloquial definitions&apos;  is terrible.
+
+Can you fix to something like:
+
+A statement of necessary and sufficient conditions explaining the meaning of an expression referring to a class or property.
+
+Alan Ruttenberg
+
+Your proposed definition is a reasonable candidate, except that it is very common that necessary and sufficient conditions are not given. Mostly they are necessary, occasionally they are necessary and sufficient or just sufficient. Often they use terms that are not themselves defined and so they effectively can&apos;t be evaluated by those criteria. 
+
+On the specifics of the proposed definition:
+
+We don&apos;t have definitions of &apos;meaning&apos; or &apos;expression&apos; or &apos;property&apos;. For &apos;reference&apos; in the intended sense I think we use the term &apos;denotation&apos;. For &apos;expression&apos;, I think we you mean symbol, or identifier. For &apos;meaning&apos; it differs for class and property. For class we want documentation that let&apos;s the intended reader determine whether an entity is instance of the class, or not. For property we want documentation that let&apos;s the intended reader determine, given a pair of potential relata, whether the assertion that the relation holds is true. The &apos;intended reader&apos; part suggests that we also specify who, we expect, would be able to understand the definition, and also generalizes over human and computer reader to include textual and logical definition. 
+
+Personally, I am more comfortable weakening definition to documentation, with instructions as to what is desirable. 
+
+We also have the outstanding issue of how to aim different definitions to different audiences. A clinical audience reading chebi wants a different sort of definition documentation/definition from a chemistry trained audience, and similarly there is a need for a definition that is adequate for an ontologist to work with.  </obo:IAO_0000116>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Daniel Schober</obo:IAO_0000117>
+        <obo:IAO_0000119 xml:lang="en">GROUP:OBI:&lt;http://purl.obolibrary.org/obo/obi&gt;</obo:IAO_0000119>
+        <rdfs:isDefinedBy rdf:resource="http://purl.obolibrary.org/obo/iao.owl"/>
+        <rdfs:label xml:lang="en">definition</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000116 -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.obolibrary.org/obo/IAO_0000116">
+        <obo:IAO_0000111 xml:lang="en">editor note</obo:IAO_0000111>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000122"/>
+        <obo:IAO_0000115 xml:lang="en">An administrative note intended for its editor. It may not be included in the publication version of the ontology, so it should contain nothing necessary for end users to understand the ontology.</obo:IAO_0000115>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Daniel Schober</obo:IAO_0000117>
+        <obo:IAO_0000119 xml:lang="en">GROUP:OBI:&lt;http://purl.obofoundry.org/obo/obi&gt;</obo:IAO_0000119>
+        <rdfs:isDefinedBy rdf:resource="http://purl.obolibrary.org/obo/iao.owl"/>
+        <rdfs:label xml:lang="en">editor note</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000117 -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.obolibrary.org/obo/IAO_0000117">
+        <obo:IAO_0000111 xml:lang="en">term editor</obo:IAO_0000111>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000122"/>
+        <obo:IAO_0000115 xml:lang="en">Name of editor entering the term in the file. The term editor is a point of contact for information regarding the term. The term editor may be, but is not always, the author of the definition, which may have been worked upon by several people</obo:IAO_0000115>
+        <obo:IAO_0000116 xml:lang="en">20110707, MC: label update to term editor and definition modified accordingly. See https://github.com/information-artifact-ontology/IAO/issues/115.</obo:IAO_0000116>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Daniel Schober</obo:IAO_0000117>
+        <obo:IAO_0000119 xml:lang="en">GROUP:OBI:&lt;http://purl.obolibrary.org/obo/obi&gt;</obo:IAO_0000119>
+        <rdfs:isDefinedBy rdf:resource="http://purl.obolibrary.org/obo/iao.owl"/>
+        <rdfs:label xml:lang="en">term editor</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000119 -->
+
+    <owl:AnnotationProperty rdf:about="http://purl.obolibrary.org/obo/IAO_0000119">
+        <obo:IAO_0000111 xml:lang="en">definition source</obo:IAO_0000111>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000122"/>
+        <obo:IAO_0000115 xml:lang="en">Formal citation, e.g. identifier in external database to indicate / attribute source(s) for the definition. Free text indicate / attribute source(s) for the definition. EXAMPLE: Author Name, URI, MeSH Term C04, PUBMED ID, Wiki uri on 31.01.2007</obo:IAO_0000115>
+        <obo:IAO_0000117 xml:lang="en">PERSON:Daniel Schober</obo:IAO_0000117>
+        <obo:IAO_0000119 xml:lang="en">Discussion on obo-discuss mailing-list, see http://bit.ly/hgm99w</obo:IAO_0000119>
+        <obo:IAO_0000119 xml:lang="en">GROUP:OBI:&lt;http://purl.obolibrary.org/obo/obi&gt;</obo:IAO_0000119>
+        <rdfs:isDefinedBy rdf:resource="http://purl.obolibrary.org/obo/iao.owl"/>
+        <rdfs:label xml:lang="en">definition source</rdfs:label>
+    </owl:AnnotationProperty>
+    
+
+
+    <!-- http://www.ontologyrepository.com/CommonCoreOntologies/definition_source -->
+
+    <rdf:Description rdf:about="http://www.ontologyrepository.com/CommonCoreOntologies/definition_source">
+        <CommonCoreOntologies:is_curated_in_ontology rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.ontologyrepository.com/CommonCoreOntologies/Mid/ExtendedRelationOntology</CommonCoreOntologies:is_curated_in_ontology>
+        <rdfs:label xml:lang="en">definition source</rdfs:label>
+        <skos:definition xml:lang="en">A citation of where all or some of the information used to create the term&apos;s Definition was acquired from.</skos:definition>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.ontologyrepository.com/CommonCoreOntologies/is_curated_in_ontology -->
+
+    <rdf:Description rdf:about="http://www.ontologyrepository.com/CommonCoreOntologies/is_curated_in_ontology">
+        <CommonCoreOntologies:is_curated_in_ontology rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.ontologyrepository.com/CommonCoreOntologies/Mid/ExtendedRelationOntology</CommonCoreOntologies:is_curated_in_ontology>
+        <rdfs:label xml:lang="en">is curated in ontology</rdfs:label>
+        <skos:definition xml:lang="en">An annotation property that links a class, property, or named individual to the URI of the ontology where it is located.</skos:definition>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/2000/01/rdf-schema#isDefinedBy -->
+
+    <rdf:Description rdf:about="http://www.w3.org/2000/01/rdf-schema#isDefinedBy">
+        <rdfs:comment>The definition of the subject resource.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/2000/01/rdf-schema#"/>
+        <rdfs:label>isDefinedBy</rdfs:label>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/2004/02/skos/core#definition -->
+
+    <rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#definition">
+        <rdfs:isDefinedBy rdf:resource="http://www.w3.org/2004/02/skos/core"/>
+        <rdfs:label xml:lang="en">definition</rdfs:label>
+        <skos:definition xml:lang="en">A statement or formal explanation of the meaning of a concept.</skos:definition>
+    </rdf:Description>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasForecast -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasForecast">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:range rdf:resource="https://w3id.org/eepsa/exn4eepsa#Forecast"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasLogisticShipmentData -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasLogisticShipmentData">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/logistics#hasLogisticsData"/>
+        <rdfs:range rdf:resource="http://infohub.siemens-energy.com/logistics#LogisticShipmentData"/>
+        <rdfs:label>has logistic shipment data</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasLogisticSiteData -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasLogisticSiteData">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/logistics#hasLogisticsData"/>
+        <rdfs:range rdf:resource="http://infohub.siemens-energy.com/logistics#LogisticSiteData"/>
+        <rdfs:label>has logistic site data</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasLogisticsData -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasLogisticsData">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:range rdf:resource="http://infohub.siemens-energy.com/logistics#LogisticData"/>
+        <rdfs:label>has logistics data</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasQuantity -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasQuantity">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:range rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/Measure"/>
+        <rdfs:label>has quantity</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasReceivedQuantity -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasReceivedQuantity">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/logistics#hasQuantity"/>
+        <rdfs:range rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/Measure"/>
+        <rdfs:label>has received quantity</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasSupplier -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasSupplier">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/props#hasParticipant"/>
+        <owl:inverseOf rdf:resource="http://infohub.siemens-energy.com/logistics#isSupplierOf"/>
+        <rdfs:domain rdf:resource="https://w3id.org/rec/core/Asset"/>
+        <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+        <rdfs:comment>Relationship between an asset and the agent that provides it.</rdfs:comment>
+        <rdfs:label>has supplier</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasTransportPartner -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasTransportPartner">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:range rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+        <rdfs:label>has transport partner</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasTransportType -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasTransportType">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:range rdf:resource="http://infohub.siemens-energy.com/logistics#TransportType"/>
+        <rdfs:label>has transport type</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasTransportationFacility -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasTransportationFacility">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:range rdf:resource="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility"/>
+        <rdfs:label>has transportation facility</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasTransportationFacilityOfEntry -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasTransportationFacilityOfEntry">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/logistics#hasTransportationFacility"/>
+        <rdfs:range rdf:resource="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility"/>
+        <rdfs:label>has transportation facility of entry</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasTransportationFacilityOfLoading -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasTransportationFacilityOfLoading">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/logistics#hasTransportationFacility"/>
+        <rdfs:range rdf:resource="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility"/>
+        <rdfs:label>has transportation facility of loading</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#isSupplierOf -->
+
+    <owl:ObjectProperty rdf:about="http://infohub.siemens-energy.com/logistics#isSupplierOf">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/props#isParticipantOf"/>
+        <rdfs:domain rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+        <rdfs:range rdf:resource="https://w3id.org/rec/core/Asset"/>
+        <rdfs:comment>Relationship between an agent and the assets it provides</rdfs:comment>
+        <rdfs:label>is supplier of</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasActualDateTimeOfArrivalAtSite -->
+
+    <owl:DatatypeProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasActualDateTimeOfArrivalAtSite">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/logistics#hasDateTimeOfArrival"/>
+        <rdfs:label>has actual date time of arrival at site</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasAmendment -->
+
+    <owl:DatatypeProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasAmendment">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:label>has amendment</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasContentOfShipmentDescription -->
+
+    <owl:DatatypeProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasContentOfShipmentDescription">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+        <rdfs:label>has content of shipment description</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasDateTimeOfArrival -->
+
+    <owl:DatatypeProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasDateTimeOfArrival">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/top-props#hasDateTime"/>
+        <rdfs:label>has date time of arrival</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasEstimatedDateTimeOfArrivalAtPort -->
+
+    <owl:DatatypeProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasEstimatedDateTimeOfArrivalAtPort">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/logistics#hasDateTimeOfArrival"/>
+        <rdfs:label>has estimated date time of arrival at port</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#hasEstimatedDateTimeOfDeparture -->
+
+    <owl:DatatypeProperty rdf:about="http://infohub.siemens-energy.com/logistics#hasEstimatedDateTimeOfDeparture">
+        <rdfs:subPropertyOf rdf:resource="http://infohub.siemens-energy.com/top-props#hasDateTime"/>
+        <rdfs:label>has estimated date time of departure</rdfs:label>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#BillOfQuantities -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#BillOfQuantities">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/IAO_0000310"/>
+        <rdfs:subClassOf rdf:resource="https://spec.edmcouncil.org/fibo/ontology/FND/Agreements/Contracts/Contract"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/organizations#hasContractor"/>
+                <owl:allValuesFrom rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <obo:IAO_0000115>A Bill of Quantities (BoQ) is a detailed document used in construction projects that lists out all the materials, parts, and labor needed to complete the work. It breaks down the project into measurable sections and assigns quantities and units to each item.</obo:IAO_0000115>
+        <om-2:alternativeLabel>BoQ</om-2:alternativeLabel>
+        <rdfs:label>bill of quantities</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#LogisticData -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#LogisticData">
+        <rdfs:label>logistic data</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#LogisticShipmentData -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#LogisticShipmentData">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/logistics#LogisticData"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasTransportPartner"/>
+                <owl:allValuesFrom rdf:resource="http://xmlns.com/foaf/0.1/Agent"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasTransportType"/>
+                <owl:allValuesFrom rdf:resource="http://infohub.siemens-energy.com/logistics#TransportType"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasTransportationFacilityOfEntry"/>
+                <owl:allValuesFrom rdf:resource="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasTransportationFacilityOfLoading"/>
+                <owl:allValuesFrom rdf:resource="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/props#hasGrossWeight"/>
+                <owl:allValuesFrom rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/Measure"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasActualDateTimeOfArrivalAtSite"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasEstimatedDateTimeOfArrivalAtPort"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasEstimatedDateTimeOfDeparture"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="http://infohub.siemens-energy.com/logistics#LogisticSiteData"/>
+        <rdfs:label>logistic shipment data</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#LogisticSiteData -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#LogisticSiteData">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/logistics#LogisticData"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasReceivedQuantity"/>
+                <owl:allValuesFrom rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/Measure"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://infohub.siemens-energy.com/logistics#hasDateTimeOfArrival"/>
+                <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:label>logistic site data</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#OrderBillOfQuantities -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#OrderBillOfQuantities">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/logistics#BillOfQuantities"/>
+        <rdfs:label>order bill of quantities</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#PositionBillOfQuantities -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#PositionBillOfQuantities">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/logistics#BillOfQuantities"/>
+        <rdfs:label>position bill of quantities</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#SectorBillOfQuantities -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#SectorBillOfQuantities">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/logistics#BillOfQuantities"/>
+        <rdfs:label>sector bill of quantities</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#SubsectorBillOfQuantities -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#SubsectorBillOfQuantities">
+        <rdfs:subClassOf rdf:resource="http://infohub.siemens-energy.com/logistics#BillOfQuantities"/>
+        <rdfs:label>subsector bill of quantities</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://infohub.siemens-energy.com/logistics#TransportType -->
+
+    <owl:Class rdf:about="http://infohub.siemens-energy.com/logistics#TransportType">
+        <rdfs:label>transport type</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://purl.obolibrary.org/obo/IAO_0000310 -->
+
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/IAO_0000310">
+        <obo:IAO_0000111 xml:lang="en">document</obo:IAO_0000111>
+        <obo:IAO_0000112 xml:lang="en">A journal article, patent application, laboratory notebook, or a book</obo:IAO_0000112>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000120"/>
+        <obo:IAO_0000115 xml:lang="en">A collection of information content entities intended to be understood together as a whole</obo:IAO_0000115>
+        <obo:IAO_0000117 xml:lang="en">PERSON: Lawrence Hunter</obo:IAO_0000117>
+        <rdfs:label xml:lang="en">document</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologyrepository.com/CommonCoreOntologies/Airport -->
+
+    <owl:Class rdf:about="http://www.ontologyrepository.com/CommonCoreOntologies/Airport">
+        <rdfs:subClassOf rdf:resource="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility"/>
+        <CommonCoreOntologies:definition_source rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/w/index.php?title=Airport&amp;oldid=1063243963</CommonCoreOntologies:definition_source>
+        <CommonCoreOntologies:is_curated_in_ontology rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.ontologyrepository.com/CommonCoreOntologies/Mid/FacilityOntology</CommonCoreOntologies:is_curated_in_ontology>
+        <rdfs:label xml:lang="en">Airport</rdfs:label>
+        <skos:definition xml:lang="en">A Transportation Facility that is designed for launching, receiving, and housing Aircraft.</skos:definition>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologyrepository.com/CommonCoreOntologies/Port -->
+
+    <owl:Class rdf:about="http://www.ontologyrepository.com/CommonCoreOntologies/Port">
+        <rdfs:subClassOf rdf:resource="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility"/>
+        <CommonCoreOntologies:definition_source rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/w/index.php?title=Port&amp;oldid=1064091505</CommonCoreOntologies:definition_source>
+        <CommonCoreOntologies:is_curated_in_ontology rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.ontologyrepository.com/CommonCoreOntologies/Mid/FacilityOntology</CommonCoreOntologies:is_curated_in_ontology>
+        <rdfs:label xml:lang="en">Port</rdfs:label>
+        <skos:definition xml:lang="en">A Transportation Facility that is designed to contain harbors for docking Watercraft and for transfering people or cargo to and from land.</skos:definition>
+    </owl:Class>
+    
+
+
+    <!-- http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility -->
+
+    <owl:Class rdf:about="http://www.ontologyrepository.com/CommonCoreOntologies/TransportationFacility">
+        <CommonCoreOntologies:definition_source rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/w/index.php?title=Transport&amp;oldid=1063526665</CommonCoreOntologies:definition_source>
+        <CommonCoreOntologies:is_curated_in_ontology rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://www.ontologyrepository.com/CommonCoreOntologies/Mid/FacilityOntology</CommonCoreOntologies:is_curated_in_ontology>
+        <rdfs:label xml:lang="en">Transportation Facility</rdfs:label>
+        <skos:definition xml:lang="en">A Facility that is designed for commencing or concluding the transportation of transportation artifacts, or for housing transportation artifacts.</skos:definition>
+    </owl:Class>
+    
+
+
+    <!-- https://w3id.org/eepsa/exn4eepsa#Forecast -->
+
+    <owl:Class rdf:about="https://w3id.org/eepsa/exn4eepsa#Forecast">
+        <rdfs:comment xml:lang="en">An observation estimated by a predictive model implementing a predictive procedure.</rdfs:comment>
+        <rdfs:isDefinedBy rdf:resource="https://w3id.org/eepsa/exn4eepsa"/>
+        <rdfs:label xml:lang="en">Forecast</rdfs:label>
+        <ns:term_status rdf:datatype="http://www.w3.org/2001/XMLSchema#string">stable</ns:term_status>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+
