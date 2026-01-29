@@ -118,7 +118,7 @@ Una vez:
 Ejecuta:
 
 ```bash
-python main.py
+python get_store_embeddings.py
 ```
 
 El procesamiento se realiza en **paralelo**, utilizando todos los núcleos disponibles de la CPU.
