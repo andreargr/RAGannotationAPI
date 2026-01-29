@@ -207,7 +207,7 @@ async def column_annotation(
 @router.post("/rows")
 async def row_annotation(
     file: UploadFile = File(..., description="CSV or Excel file with the columns to be annotated."),
-    column_name: str = Form(..., description="Name of the column whose rows should be annotated.",examples="column_name"),
+    column_name: str = Form(..., description="Name of the column whose rows should be annotated.", examples=["column name"]),
     top_class_per_entity: conint(ge=1, le=10) = Form(
         1,
         description=(
@@ -215,7 +215,7 @@ async def row_annotation(
                 "to return per input entity (1–10)."
         )
     ),
-    ontology_ids: Optional[str] = Form(None, description="Comma-separated list of ontology OLS IDs to use for annotation."),
+    ontology_ids: Optional[str] = Form("", description="Comma-separated list of ontology OLS IDs to use for annotation."),
     top_n: Optional[int] = Form(2, description="Number of top ontologies to return. 0 means return all."),
     score_threshold: confloat(ge=0.1, le=1.0) = Form(
         0.5,
