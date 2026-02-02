@@ -155,12 +155,17 @@ async def column_annotation(
             for m in matches or []:
                 score = float(m.get("score", 0.0))
                 if score > score_threshold:
+                    item = next(
+                        (o for o in ontology_data if o.get("id") == m.get("class_iri")),
+                        None
+                    )
                     entry = {
                         **{k: v for k, v in m.items() if k not in (
                             "class_iri", "class_label", "individual_iri", "individual_label")},
                         "class": {
                             "iri": m.get("class_iri"),
-                            "label": m.get("class_label", [])
+                            "label": m.get("class_label", []),
+                            "comment": item.get("comment") if item else None
                         }
                     }
                     if m.get("type") == "individual":
@@ -317,12 +322,17 @@ async def row_annotation(
             for m in matches or []:
                 score = float(m.get("score", 0.0))
                 if score > score_threshold:
+                    item = next(
+                        (o for o in ontology_data if o.get("id") == m.get("class_iri")),
+                        None
+                    )
                     entry = {
                         **{k: v for k, v in m.items() if k not in (
                             "class_iri", "class_label", "individual_iri", "individual_label")},
                         "class": {
                             "iri": m.get("class_iri"),
-                            "label": m.get("class_label", [])
+                            "label": m.get("class_label", []),
+                            "comment": item.get("comment") if item else None
                         }
                     }
                     if m.get("type") == "individual":
