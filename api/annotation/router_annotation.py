@@ -108,7 +108,7 @@ async def column_annotation(
         content = await file.read()
         filename = file.filename.lower()
         if filename.endswith(".csv"):
-            df = pd.read_csv(StringIO(content.decode("utf-8")), sep=";")
+            df = pd.read_csv(StringIO(content.decode("utf-8")), sep=",")
         elif filename.endswith((".xls", ".xlsx")):
             df = pd.read_excel(BytesIO(content))
         else:
@@ -254,7 +254,7 @@ async def row_annotation(
         content = await file.read()
         filename = file.filename.lower()
         if filename.endswith(".csv"):
-            df = pd.read_csv(StringIO(content.decode("utf-8")), sep=";")
+            df = pd.read_csv(StringIO(content.decode("utf-8")), sep=",")
         elif filename.endswith((".xls", ".xlsx")):
             df = pd.read_excel(BytesIO(content))
         else:
