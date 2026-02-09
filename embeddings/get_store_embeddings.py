@@ -177,6 +177,28 @@ def get_individuals_of_class(g, class_uri):
             })
     return individuals
 
+def get_definition(g, uri):
+    # Prefer skos:definition, fallback to rdfs:comment
+    for o in g.objects(uri, SKOS.definition):
+        return str(o)
+    for o in g.objects(uri, RDFS.comment):
+        return str(o)
+    return ""
+
+def get_domains(g, prop_uri):
+    return [
+        get_preferred_name(g, o)
+        for o in g.objects(prop_uri, RDFS.domain)
+        if isinstance(o, URIRef)
+    ]
+
+def get_ranges(g, prop_uri):
+    return [
+        get_preferred_name(g, o)
+        for o in g.objects(prop_uri, RDFS.range)
+        if isinstance(o, URIRef)
+    ]
+
 
 def extract_class_structure(g, class_uri):
     super_classes = [
@@ -191,17 +213,33 @@ def extract_class_structure(g, class_uri):
         if isinstance(s, URIRef)
     ]
 
-    object_properties = [
-        get_preferred_name(g, p)
-        for p in g.subjects(RDF.type, OWL.ObjectProperty)
-        if class_uri in g.objects(p, RDFS.domain)
-    ]
+    object_properties = []
 
-    data_properties = [
-        get_preferred_name(g, p)
-        for p in g.subjects(RDF.type, OWL.DatatypeProperty)
-        if class_uri in g.objects(p, RDFS.domain)
-    ]
+    for p in g.subjects(RDF.type, OWL.ObjectProperty):
+        if class_uri not in g.objects(p, RDFS.domain):
+            continue
+
+        object_properties.append({
+            "iri": str(p),
+            "label": get_all_labels(g, p),
+            "definition": get_definition(g, p),
+            "domain": get_domains(g, p),
+            "range": get_ranges(g, p)
+        })
+
+    data_properties = []
+
+    for p in g.subjects(RDF.type, OWL.DatatypeProperty):
+        if class_uri not in g.objects(p, RDFS.domain):
+            continue
+
+        data_properties.append({
+            "iri": str(p),
+            "label": get_all_labels(g, p),
+            "definition": get_definition(g, p),
+            "domain": get_domains(g, p),
+            "range": get_ranges(g, p)
+        })
 
     equivalent_classes = [
         get_preferred_name(g, o)
@@ -247,23 +285,63 @@ def summary_to_text(classes_summary):
     texts = []
 
     for cls in classes_summary:
-        text = f"Class {', '.join(cls.get('label', []))}. "
+        labels = cls.get("label", [])
+        class_name = ", ".join(labels) if labels else "Unnamed class"
 
+        text = f"Class {class_name}. "
+
+        # Class description
         if cls.get("comment"):
             text += f"Description: {cls['comment']}. "
 
+        # Hierarchy
         if cls.get("superClasses"):
             text += f"Superclasses: {', '.join(cls['superClasses'])}. "
 
         if cls.get("subClasses"):
             text += f"Subclasses: {', '.join(cls['subClasses'])}. "
 
-        if cls.get("objectProperties"):
-            text += f"Object properties: {', '.join(cls['objectProperties'])}. "
+        # Object properties
+        object_properties = cls.get("objectProperties", [])
+        if object_properties:
+            for op in object_properties:
+                op_labels = ", ".join(op.get("label", [])) or "Unnamed object property"
+                definition = op.get("definition", "")
+                domain = ", ".join(op.get("domain", []))
+                range_ = ", ".join(op.get("range", []))
 
-        if cls.get("dataProperties"):
-            text += f"Data properties: {', '.join(cls['dataProperties'])}. "
+                text += f"Object property {op_labels}. "
 
+                if definition:
+                    text += f"Definition: {definition}. "
+
+                if domain:
+                    text += f"Domain: {domain}. "
+
+                if range_:
+                    text += f"Range: {range_}. "
+
+        # Data properties
+        data_properties = cls.get("dataProperties", [])
+        if data_properties:
+            for dp in data_properties:
+                dp_labels = ", ".join(dp.get("label", [])) or "Unnamed data property"
+                definition = dp.get("definition", "")
+                domain = ", ".join(dp.get("domain", []))
+                range_ = ", ".join(dp.get("range", []))
+
+                text += f"Data property {dp_labels}. "
+
+                if definition:
+                    text += f"Definition: {definition}. "
+
+                if domain:
+                    text += f"Domain: {domain}. "
+
+                if range_:
+                    text += f"Range: {range_}. "
+
+        # Individuals
         if cls.get("individuals"):
             individuals_text = ", ".join(
                 f"{ind['label']} ({ind['iri']})"
@@ -271,9 +349,10 @@ def summary_to_text(classes_summary):
             )
             text += f"Individuals: {individuals_text}. "
 
-        texts.append(text)
+        texts.append(text.strip())
 
     return "\n".join(texts)
+
 
 
 def process_ontology (dataset, neo4j_url, neo4j_user, neo4j_pwd):
@@ -284,10 +363,10 @@ def process_ontology (dataset, neo4j_url, neo4j_user, neo4j_pwd):
         classes_summary = extract_all_classes(graph)  # extract ontology summary
         summary_text = summary_to_text(classes_summary)  # convert it to text to improve the quality of embeddings
 
-        # summary_path = f"{NEO4J_SUMMARY_FOLDER}/{id}.json"
-        #
-        # with open(summary_path, "w", encoding="utf-8") as file:
-        #     json.dump(classes_summary, file, indent=2, ensure_ascii=False)
+        summary_path = f"{NEO4J_SUMMARY_FOLDER}/{id}.json"
+
+        with open(summary_path, "w", encoding="utf-8") as file:
+            json.dump(classes_summary, file, indent=2, ensure_ascii=False)
 
         embedding = manager.embedding_model.encode(summary_text,
                 normalize_embeddings=True).tolist() # get embeddings

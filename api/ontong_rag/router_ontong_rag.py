@@ -31,6 +31,426 @@ REL_CLASS_ASSOC_RE = re.compile(
 
 MULTIPLICITY_TOKEN_RE = re.compile(r'^\s*"\s*[\w\.\*\+]*\s*"\s*$')
 
+# ============================================================
+# ===============   Properties HANDLERS   ==================
+# ============================================================
+
+ATTR_RE = re.compile(r'^[\+\-#]?\s*([A-Za-z_]\w*)\s*:\s*([^\s]+)')
+
+def query_text_for_relation(rel: Dict[str, str]) -> str:
+    # Convert a detected relationship to a texto for search
+    parts = []
+    parts.append(camel_to_words(rel.get("src", "")))
+    label = rel.get("label", "")
+    if label:
+        parts.append(camel_to_words(label))
+
+    # A::campo -- B::campo)
+    if rel.get("src_field"):
+        parts.append(camel_to_words(rel["src_field"]))
+    parts.append(camel_to_words(rel.get("dst", "")))
+    if rel.get("dst_field"):
+        parts.append(camel_to_words(rel["dst_field"]))
+
+    q = " ".join([p for p in parts if p])
+    return q.strip()
+
+def parse_plantuml_class_attributes(plantuml_text: str) -> Dict[str, List[Dict[str, str]]]:
+
+    """
+    Extracts class/entity attributes from PlantUML.
+    Returns: { "Person": [ {"name": "name", "type": "xsd:string", "raw": "+name: xsd:string"}, ... ] }
+    """
+    attrs_by_class: Dict[str, List[Dict[str, str]]] = {}
+
+    for m in ENTITY_RE.finditer(plantuml_text):
+        class_name = m.group(1) or m.group(2)
+        body = m.group(3)
+
+        for line in body.splitlines():
+            line = line.strip()
+            # Jump the line
+            if re.match(r'^(IRI|type)\s*:', line, re.IGNORECASE):
+                continue
+
+            am = ATTR_RE.match(line)
+            if not am:
+                continue
+
+            attr_name, attr_type = am.groups()
+            attrs_by_class.setdefault(class_name, []).append({
+                "name": attr_name,
+                "type": attr_type,
+                "raw": line,
+            })
+
+    return attrs_by_class
+
+def aggregate_by_object_property(
+    top_hits: List[Tuple[int, float]],
+    meta: List[Tuple],
+    ontology: List[Dict[str, Any]],
+    limit: int = 3
+):
+    """
+    Aggregate matches by (ont_idx, prop_idx), keeping the best score.
+    Compatible with the new objectProperties summary structure.
+    """
+    best = {}
+
+    for row_idx, score in top_hits:
+        (
+            ont_idx,
+            prop_idx,
+            dom_label,
+            dom_iri,
+            prop_iri,
+            prop_labels,
+            range_labels,
+            tag,
+            text
+        ) = meta[row_idx]
+
+        key = (ont_idx, prop_idx)
+
+        if key not in best or score > best[key]["score"]:
+            best[key] = {
+                "score": score,
+                "domain_label": dom_label,
+                "domain_iri": dom_iri,
+                "property_iri": prop_iri,
+                "property_labels": prop_labels or [],
+                "range_labels": range_labels or [],
+                "matched_field": tag,
+                "matched_text": text
+            }
+
+    ranked = sorted(best.items(), key=lambda kv: -kv[1]["score"])[:limit]
+
+    out = []
+    for (ont_idx, prop_idx), info in ranked:
+        out.append({
+            "domain_label": info["domain_label"],
+            "domain_iri": info["domain_iri"],
+
+            "property_label": (
+                ", ".join(info["property_labels"])
+                if info["property_labels"]
+                else iri_suffix(info["property_iri"])
+            ),
+            "property_iri": info["property_iri"],
+
+            "range_label": (
+                ", ".join(info["range_labels"])
+                if info["range_labels"]
+                else ""
+            ),
+
+            "score": round(float(info["score"]), 4),
+            "matched_field": info["matched_field"],
+            "matched_text": info["matched_text"]
+        })
+
+    return out
+
+
+def parse_free_text_relations(text: str) -> List[Dict[str, str]]:
+    # Normalizar separadores a '\n'
+    for sep in [",", ";"]:
+        text = text.replace(sep, "\n")
+
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    relations: List[Dict[str, str]] = []
+
+    for line in lines:
+        # Para texto libre no intentamos parsear src/dst,
+        # usamos la frase completa como "label" de la relación
+        relations.append({
+            "type": "free_text",
+            "src": "",
+            "dst": "",
+            "src_field": "",
+            "dst_field": "",
+            "label": line,
+            "raw": line
+        })
+
+    return relations
+
+
+def object_property_text_variants(
+    domain_label: str,
+    domain_iri: str,
+    prop: Dict[str, Any]
+):
+    texts = []
+
+    prop_iri = prop.get("iri", "")
+    prop_labels = prop.get("label", [])
+    prop_label = prop_labels[0] if prop_labels else iri_suffix(prop_iri)
+
+    ranges = prop.get("range", [])
+    range_label = ranges[0] if ranges else ""
+
+    definition = prop.get("definition", "")
+
+    dom_label = domain_label or iri_suffix(domain_iri)
+
+    # --- TOKEN LEVEL ---
+    for t in [prop_label, range_label, dom_label]:
+        if t:
+            texts.append((t, "token"))
+
+    # --- COMPOSITE SHORT PHRASES ---
+    combos = [
+        f"{dom_label} {prop_label} {range_label}",
+        f"{prop_label} {range_label}",
+        f"{dom_label} {prop_label}",
+        f"{prop_label}"
+    ]
+
+    for c in combos:
+        c = " ".join(c.split())
+        if c:
+            texts.append((c, "composite"))
+
+    # --- SEMANTIC VARIANTS (NEW, pero ligeras) ---
+    if definition:
+        texts.append((f"{prop_label}. {definition}", "definition"))
+
+    if dom_label and range_label:
+        texts.append((
+            f"{prop_label} relates {dom_label} to {range_label}",
+            "semantic"
+        ))
+
+    # --- DEDUPLICATION ---
+    seen = set()
+    out = []
+    for t, tag in texts:
+        key = (t.lower(), tag)
+        if key not in seen:
+            seen.add(key)
+            out.append((t, tag))
+
+    return out
+
+
+def build_objectprop_index(ontology: List[Dict[str, Any]],model):
+
+    texts = []
+    meta = []
+
+    for i, cls in enumerate(ontology):
+        domain_labels = cls.get("label", [])
+        domain_label = ", ".join(domain_labels) if domain_labels else ""
+        domain_iri = cls.get("id", "")
+
+        for j, prop in enumerate(cls.get("objectProperties", []) or []):
+            for t, tag in object_property_text_variants(
+                domain_label, domain_iri, prop
+            ):
+                texts.append(t)
+                meta.append((
+                    i, j,
+                    domain_label,
+                    domain_iri,
+                    prop.get("iri", ""),
+                    prop.get("label", []),
+                    prop.get("range", []),
+                    tag,
+                    t
+                ))
+
+    if not texts:
+        dim = model.get_sentence_embedding_dimension()
+        return np.zeros((0, dim), dtype=np.float32), []
+
+    emb = model.encode(
+        texts,
+        convert_to_numpy=True,
+        normalize_embeddings=True
+    )
+
+    return emb, meta
+
+def data_property_text_variants(
+    domain_label: str,
+    domain_iri: str,
+    prop: Dict[str, Any]
+):
+    texts = []
+
+    prop_iri = prop.get("iri", "")
+    prop_labels = prop.get("label", [])
+    prop_label = prop_labels[0] if prop_labels else iri_suffix(prop_iri)
+
+    ranges = prop.get("range", [])
+    range_label = ranges[0] if ranges else ""
+
+    definition = prop.get("definition", "")
+
+    dom_label = domain_label or iri_suffix(domain_iri)
+
+    # --- TOKEN LEVEL ---
+    for t in [prop_label, range_label, dom_label]:
+        if t:
+            texts.append((t, "token"))
+
+    # --- COMPOSITE PHRASES ---
+    combos = [
+        f"{dom_label} {prop_label}",
+        f"{prop_label} {range_label}",
+        f"{prop_label}",
+    ]
+
+    for c in combos:
+        c = " ".join(c.split())
+        if c:
+            texts.append((c, "composite"))
+
+    # --- SEMANTIC VARIANTS ---
+    if definition:
+        texts.append((f"{prop_label}. {definition}", "definition"))
+
+    if dom_label and range_label:
+        texts.append((
+            f"{prop_label} of {dom_label} is {range_label}",
+            "semantic"
+        ))
+
+    # --- DEDUP ---
+    seen = set()
+    out = []
+    for t, tag in texts:
+        key = (t.lower(), tag)
+        if key not in seen:
+            seen.add(key)
+            out.append((t, tag))
+
+    return out
+
+
+def build_dataprop_index(ontology: List[Dict[str, Any]], model):
+    """
+    Builds an embedding index for data properties (class.dataProperties).
+    Compatible with the new summary structure.
+    """
+    texts = []
+    meta = []
+
+    for i, cls in enumerate(ontology):
+        domain_labels = cls.get("label", [])
+        domain_label = ", ".join(domain_labels) if domain_labels else ""
+        domain_iri = cls.get("id", "")
+
+        for j, dp in enumerate(cls.get("dataProperties", []) or []):
+            for t, tag in data_property_text_variants(
+                domain_label, domain_iri, dp
+            ):
+                texts.append(t)
+                meta.append((
+                    i, j,
+                    domain_label,
+                    domain_iri,
+                    dp.get("iri", ""),
+                    dp.get("label", []),   # LISTA
+                    dp.get("range", []),   # LISTA
+                    tag,
+                    t
+                ))
+
+    if not texts:
+        dim = model.get_sentence_embedding_dimension()
+        return np.zeros((0, dim), dtype=np.float32), []
+
+    emb = model.encode(
+        texts,
+        convert_to_numpy=True,
+        normalize_embeddings=True
+    )
+
+    return emb, meta
+
+def query_text_for_attribute(class_name: str, attr_name: str, attr_type: str = "") -> str:
+    parts = [
+        camel_to_words(class_name),
+        camel_to_words(attr_name),
+    ]
+    if attr_type:
+        parts.append(camel_to_words(attr_type))
+
+    return " ".join(p for p in parts if p)
+
+def aggregate_by_data_property(
+    top_hits: List[Tuple[int, float]],
+    meta: List[Tuple],
+    ontology: List[Dict[str, Any]],
+    limit: int = 3
+):
+    """
+    Selects the best-matching data properties based on their score.
+    Compatible with the new dataProperties summary structure.
+    """
+
+    best = {}
+
+    for row_idx, score in top_hits:
+        (
+            ont_idx,
+            dp_idx,
+            dom_label,
+            dom_iri,
+            prop_iri,
+            prop_labels,
+            range_labels,
+            tag,
+            text
+        ) = meta[row_idx]
+
+        key = (ont_idx, dp_idx)
+
+        if key not in best or score > best[key]["score"]:
+            best[key] = {
+                "score": score,
+                "domain_label": dom_label,
+                "domain_iri": dom_iri,
+                "property_iri": prop_iri,
+                "property_labels": prop_labels or [],
+                "range_labels": range_labels or [],
+                "matched_field": tag,
+                "matched_text": text,
+            }
+
+    ranked = sorted(best.items(), key=lambda kv: -kv[1]["score"])[:limit]
+
+    out = []
+    for (ont_idx, dp_idx), info in ranked:
+        out.append({
+            "domain_label": info["domain_label"],
+            "domain_iri": info["domain_iri"],
+
+            "property_label": (
+                ", ".join(info["property_labels"])
+                if info["property_labels"]
+                else iri_suffix(info["property_iri"])
+            ),
+            "property_iri": info["property_iri"],
+
+            "range_label": (
+                ", ".join(info["range_labels"])
+                if info["range_labels"]
+                else ""
+            ),
+
+            "score": round(float(info["score"]), 4),
+            "matched_field": info["matched_field"],
+            "matched_text": info["matched_text"],
+        })
+
+    return out
+
+
 def raise_neo4j_http(e: Neo4jError):
     msg = str(e)
 
@@ -182,6 +602,8 @@ def parse_plantuml_relations(plantuml_text: str):
             "raw": plantuml_text[m2.start():m2.end()]
         })
     return relations
+
+
 
 def analyze_input_text(description_text: Optional[str]) -> Tuple[str, Dict[str, Any]]:
 
@@ -560,11 +982,13 @@ def ontology_similarity(
     Parameters info:
     - `top_k`: Maximum number of ontology candidates to return (1–100).
     - `description_text`: Raw description (plain text or PlantUML) used as embedding input.
+    - `blacklist`: Optional comma-separated list of ontology IDs to exclude from results.
 
     Usage logic:
     - The function analyzes the input using `analyze_input_text` to detect whether it
       resembles PlantUML and to produce warnings.
     - The raw input text is embedded and passed to `manager.find_most_similar_ontology`.
+    - If `blacklist` is provided, blacklisted ontology IDs are removed while preserving rank.
     - The endpoint returns the ranked list plus PlantUML detection metadata and warnings.
     """
 
@@ -715,7 +1139,11 @@ def entities_similar(
     seen_class_iris: set = set()
 
     for ontology_id in ontology_ids_list:
-        ontology_data = manager.get_ontology_summary(ontology_id) #get ontology summary
+
+        try:
+            ontology_data = manager.get_ontology_summary(ontology_id) #get ontology summary
+        except Neo4jError as e:
+            raise_neo4j_http(e)
 
         raw_mapping = build_semantic_mapping_from_entities(
             entities=entities,
@@ -786,3 +1214,262 @@ def entities_similar(
         response["context"] = context_items
 
     return response
+
+@router.get("/similar-relations")
+def similar_relation (
+    description_text: Optional[str] = Query(None, description=(
+            "Input describing relationships between entities.\n"
+            "Supported formats:\n"
+            "- PlantUML model with associations (@startuml ... @enduml), e.g.:\n"
+            "    Person \"1\" -- \"0..*\" Workplace : works_at\n"
+            "- Free-text descriptions of relations, e.g.:\n"
+            "    'Person works at Workplace; Person has_skill Skill'\n"
+            "    or one per line."
+        ),
+    ),
+    ontology_ids: str = Query(None, description=(
+            "One or more ontology IDs, provided as a comma-separated string. "
+            "Each ontology is processed independently.\n"
+            "Example: 'BASO,BASF_UNITS'."
+        ),
+    ),
+    top_property_per_relation: int = Query(1, ge=1, le=10, description=(
+            "Maximum number of top matching ontology object properties "
+            "to return per detected relation."
+        ),
+    ),
+    topk_index: int = Query(30, ge=5, le=200, description=(
+            "Number of top candidates considered in the vector search over "
+            "ontology relations before aggregation (5–200)."
+        ),
+    ),
+    score_threshold: float = Query(0.0, ge=0.0, le=1.0, description=(
+            "Minimum similarity score required to include a relationship in the results. "
+            "If set to 0.0, no score-based filtering is applied."
+        ),
+    )
+):
+
+    """
+    This endpoint computes semantic similarity between input relationships and ontology properties.
+    The input may be PlantUML (associations/links and class attributes) or free-text relation descriptions.
+
+    If PlantUML is detected:
+    - Object-property relations are extracted from associations/links (e.g., ClassA -- ClassB : relation).
+    - Class attributes are also extracted and matched against ontology **data properties**.
+
+    If free text is provided:
+    - Each item is treated as an independent relationship query and matched against ontology **object properties**.
+    - (No attribute/data-property extraction is performed for free text.)
+
+    Internally, the API builds embedding indices for:
+    1) Ontology object properties (relations), using:
+    - Domain label / IRI suffix
+    - Property IRI suffix
+    - Range label / IRI suffix
+    - Composite strings combining domain + property + range
+
+    2) Ontology data properties (attributes), using:
+    - Domain label / IRI suffix (class)
+    - Data property IRI suffix
+    - Range / datatype label (when available)
+    - Composite strings combining domain + property + range/datatype
+
+    Parameters info:
+    - `description_text`: PlantUML model or free-text relations.
+    - `ontology_ids`: Comma-separated list of ontology IDs used for semantic matching.
+    - `top_property_per_relation`: Max number (1–10) of matches per detected relation/attribute.
+    - `topk_index`: Search breadth over the embedding indices before aggregation.
+    - `score_threshold`: Minimum similarity score required to keep a match.
+
+    Usage logic:
+    - The input is analyzed via `analyze_input_text` (PlantUML detection + warnings).
+    - If PlantUML:
+        • Relations are extracted using `parse_plantuml_relations`.
+        • Class attributes are extracted using `parse_plantuml_class_attributes`.
+    Else:
+        • Relations are extracted from free text using `parse_free_text_relations`.
+
+    - For each ontology ID:
+        • Load/process ontology via `process_ontology`.
+        • Load the sentence-transformer model (local MODEL_PATH or fallback).
+        • Build an object-property index via `build_objectprop_index`.
+        • For each extracted relation:
+            – Build query text (`query_text_for_relation`), embed, vector-search, aggregate
+            via `aggregate_by_object_property`, then filter by `score_threshold`.
+
+        • If PlantUML and attributes exist:
+            – Build a data-property index via `build_dataprop_index`.
+            – For each extracted attribute (class_name, attribute_name, attribute_type):
+                · Build query text (`query_text_for_attribute`), embed, vector-search,
+                aggregate via `aggregate_by_data_property`, then filter by `score_threshold`.
+
+    Return format:
+    - `is_plantuml`: Whether the input was detected as PlantUML.
+    - `warnings`: Any parsing/analysis warnings.
+    - `ontologies`: Per-ontology results with:
+        • `relations`: list of matched object properties per relation
+        • `properties`: list of matched data properties per PlantUML attribute
+    """
+    model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+    text, analysis = analyze_input_text(description_text)
+
+    # Extraer atributos de clases solo si es PlantUML
+    class_attributes_by_name = {}
+    if analysis["is_plantuml"]:
+        class_attributes_by_name = parse_plantuml_class_attributes(text)
+
+    # Validación ontology_ids
+    ontology_ids_list = [x.strip() for x in ontology_ids.split(",") if x.strip()]
+
+    if not ontology_ids_list:
+        raise HTTPException(
+            status_code=400,
+            detail="At least one ontology id must be provided in 'ontology_ids'.",
+        )
+
+    # Parseo de relaciones
+    if analysis["is_plantuml"]:
+        if analysis["relations_count"] == 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Input looks like PlantUML, but no relations were detected.",
+            )
+        relations = parse_plantuml_relations(text)
+        print("\nPARSED RELATIONS:")
+        for r in relations:
+            print(r)
+
+    else:
+        relations = parse_free_text_relations(text)
+        print("\nPARSED RELATIONS:")
+        for r in relations:
+            print(r)
+
+        if not relations:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "No relations could be derived from the free-text input. "
+                    "Provide something like 'Person works at Workplace' or multiple "
+                    "relations separated by commas, semicolons or new lines."
+                ),
+            )
+
+    all_results = []
+
+    for ontology_id in ontology_ids_list:
+
+        try:
+            ontology_data = manager.get_ontology_summary(ontology_id) #get ontology summary
+        except Neo4jError as e:
+            raise_neo4j_http(e)
+
+        index_emb, meta = build_objectprop_index(ontology_data,model)
+        print("OBJECT PROP INDEX SIZE:", index_emb.shape)
+        print("META SAMPLE:", meta[:3])
+
+        mapping = []
+        for rel in relations:
+            qtext = query_text_for_relation(rel)
+            print("\nRAW:", rel["raw"])
+            print("\nQUERY TEXT:", qtext)
+
+            if not qtext or index_emb.shape[0] == 0:
+                mapping.append({
+                    "raw_relation": rel["raw"],
+                    "query_text": qtext,
+                    "matches": []
+                })
+                continue
+
+            qemb = model.encode(
+                [qtext],
+                convert_to_numpy=True,
+                normalize_embeddings=True
+            )[0]
+
+            top_hits = cosine_topk(
+                qemb,
+                index_emb,
+                k=min(topk_index, max(1, index_emb.shape[0]))
+            )
+
+            print("\nTOP HITS:", top_hits[:5])
+
+            matches = aggregate_by_object_property(
+                top_hits,
+                meta,
+                ontology_data,
+                limit=top_property_per_relation
+            )
+            print("\nAGGREGATED MATCHES:", matches)
+
+            if score_threshold > 0:
+                matches = [m for m in matches if m["score"] >= score_threshold]
+
+            if matches:
+                mapping.append({
+                    "raw_relation": rel["raw"],
+                    "query_text": qtext,
+                    "matches": matches
+                })
+
+        properties = []
+        if analysis["is_plantuml"] and class_attributes_by_name:
+            dp_index_emb, dp_meta = build_dataprop_index(ontology_data, model)
+            print("\nDATA PROP INDEX SIZE:", dp_index_emb.shape)
+            print("\nDP META SAMPLE:", dp_meta[:3])
+
+            if dp_index_emb.shape[0] > 0:
+                for class_name, attrs in class_attributes_by_name.items():
+                    for attr in attrs:
+                        attr_name = attr["name"]
+                        attr_type = attr["type"]
+
+                        qtext_attr = query_text_for_attribute(class_name, attr_name, attr_type)
+                        if not qtext_attr:
+                            continue
+
+                        qemb_attr = model.encode(
+                            [qtext_attr],
+                            convert_to_numpy=True,
+                            normalize_embeddings=True
+                        )[0]
+
+                        top_hits_dp = cosine_topk(
+                            qemb_attr,
+                            dp_index_emb,
+                            k=min(topk_index, max(1, dp_index_emb.shape[0]))
+                        )
+
+                        matches_dp = aggregate_by_data_property(
+                            top_hits_dp,
+                            dp_meta,
+                            ontology_data,
+                            limit=top_property_per_relation
+                        )
+
+                        if score_threshold > 0:
+                            matches_dp = [m for m in matches_dp if m["score"] >= score_threshold]
+
+                        if matches_dp:
+                            properties.append({
+                                "class_name": class_name,
+                                "attribute_name": attr_name,
+                                "attribute_type": attr_type,
+                                "matches": matches_dp
+                            })
+
+        all_results.append({
+            "ontology_id": ontology_id,
+            "relations": mapping,
+            "properties": properties,
+        })
+
+    return {
+        "is_plantuml": analysis["is_plantuml"],
+        "warnings": analysis.get("warnings", []),
+        "ontologies": all_results,
+    }
