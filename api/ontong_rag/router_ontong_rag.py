@@ -4,6 +4,14 @@ from neo4j_manager import manager
 from fastapi import HTTPException,Query,APIRouter
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from neo4j.exceptions import (
+    Neo4jError,
+    ServiceUnavailable,
+    AuthError,
+    ClientError,
+    DatabaseError,
+    TransientError,
+)
 
 router = APIRouter()
 
@@ -22,6 +30,55 @@ REL_CLASS_ASSOC_RE = re.compile(
 )
 
 MULTIPLICITY_TOKEN_RE = re.compile(r'^\s*"\s*[\w\.\*\+]*\s*"\s*$')
+
+def raise_neo4j_http(e: Neo4jError):
+    msg = str(e)
+
+    # Service down / DNS / ResolvedIPv4Address / timeouts, etc.
+    if isinstance(e, ServiceUnavailable):
+        if "ResolvedIPv4Address" in msg:
+            raise HTTPException(
+                status_code=503,
+                detail="Failed to resolve Neo4j server address (ResolvedIPv4Address).",
+            )
+        raise HTTPException(
+            status_code=503,
+            detail="Neo4j service is currently unavailable (ServiceUnavailable).",
+        )
+
+    # Invalid credentials
+    if isinstance(e, AuthError):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials when connecting to Neo4j (AuthError).",
+        )
+
+    # User / query errors (bad Cypher, bad parameters, etc.)
+    if isinstance(e, ClientError):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error in Neo4j query (ClientError): {msg}",
+        )
+
+    # Internal Neo4j engine errors
+    if isinstance(e, DatabaseError):
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal Neo4j error (DatabaseError): {msg}",
+        )
+
+    # Transient errors (locks, temporary issues)
+    if isinstance(e, TransientError):
+        raise HTTPException(
+            status_code=503,
+            detail=f"Neo4j is temporarily unavailable (TransientError): {msg}",
+        )
+
+    # Any other Neo4jError
+    raise HTTPException(
+        status_code=500,
+        detail=f"Unexpected Neo4j error: {msg}",
+    )
 
 def iri_suffix(iri):
     if not iri:
@@ -472,6 +529,10 @@ def build_semantic_mapping_from_entities(
 @router.get("/similar-ontologies")
 def ontology_similarity(
         top_k: int = Query(5, ge=1, le=100, description="Maximum number of similar ontologies to retrieve (1–100)."),
+        blacklist: Optional[str] = Query(
+            None,
+            description="Comma-separated list of ontology IDs to exclude. If omitted or empty, no ontology is excluded."
+        ),
         description_text: Optional[str] = Query(None, description=(
                 "Free-text or PlantUML description of what you are looking for.\n"
                 "Examples:\n"
@@ -509,14 +570,38 @@ def ontology_similarity(
 
     query_text, analysis = analyze_input_text(description_text) #determinar si es texto plano o un plantUML en base a sus características
 
-    top_ontologies = manager.find_most_similar_ontology(query_text, top_k)
+    try:
+        top_ontologies = manager.find_most_similar_ontology(query_text, top_k)
+    except Neo4jError as e:
+        raise_neo4j_http(e)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error while querying Neo4j: {e}",
+        )
+
+    if not top_ontologies:
+        raise HTTPException(
+            status_code=400,
+            detail="No ontology embeddings were found in Neo4j."
+        )
+
+    if blacklist:
+        blacklist_ids = [x.strip() for x in blacklist.split(",") if x.strip()]
+    else:
+        blacklist_ids = []
+
+    top_ontologies_filtered = [
+        item for item in top_ontologies
+        if item["ontologyId"] not in blacklist_ids
+    ]
 
     return {
         "is_plantuml": analysis["is_plantuml"],
         "entities_count": analysis["entities_count"],
         "relations_count": analysis["relations_count"],
         "warnings": analysis["warnings"],
-        "results": top_ontologies,
+        "results": top_ontologies_filtered,
     }
 
 
