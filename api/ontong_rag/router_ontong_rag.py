@@ -130,15 +130,19 @@ def aggregate_by_object_property(
     out = []
     for (ont_idx, prop_idx), info in ranked:
         out.append({
-            "domain_label": info["domain_label"],
-            "domain_iri": info["domain_iri"],
+            "domain": {
+        "iri": info["domain_iri"],
+        "label": info["domain_label"]
+    },
 
-            "property_label": (
-                ", ".join(info["property_labels"])
-                if info["property_labels"]
-                else iri_suffix(info["property_iri"])
-            ),
-            "property_iri": info["property_iri"],
+            "property": {
+                "iri": info["property_iri"],
+                "label": (
+                    ", ".join(info["property_labels"])
+                    if info["property_labels"]
+                    else iri_suffix(info["property_iri"])
+                )
+            },
 
             "range_label": (
                 ", ".join(info["range_labels"])
@@ -430,12 +434,14 @@ def aggregate_by_data_property(
             "domain_label": info["domain_label"],
             "domain_iri": info["domain_iri"],
 
-            "property_label": (
-                ", ".join(info["property_labels"])
-                if info["property_labels"]
-                else iri_suffix(info["property_iri"])
-            ),
-            "property_iri": info["property_iri"],
+            "property": {
+                "iri": info["property_iri"],
+                "label": (
+                    ", ".join(info["property_labels"])
+                    if info["property_labels"]
+                    else iri_suffix(info["property_iri"])
+                )
+            },
 
             "range_label": (
                 ", ".join(info["range_labels"])
@@ -445,7 +451,7 @@ def aggregate_by_data_property(
 
             "score": round(float(info["score"]), 4),
             "matched_field": info["matched_field"],
-            "matched_text": info["matched_text"],
+            "matched_text": info["matched_text"]
         })
 
     return out
