@@ -393,12 +393,19 @@ if __name__ == "__main__":
     datasets = get_ontology_list()
     print("Ontologías encontradas:", len(datasets))
 
-    manager = Neo4jManager("bolt://localhost:7687", "neo4j", "password123")
+    neo4j_uri = os.environ.get('NEO4J_URI', "bolt://localhost:7687")
+    neo4j_user = os.environ.get('NEO4J_USER', "neo4j")
+    neo4j_password = os.environ.get('NEO4J_PASSWORD', "password")
+
+
+    os.makedirs("./summary", exist_ok=True)
+
+    manager = Neo4jManager(neo4j_uri, neo4j_user, neo4j_password)
     manager.create_ontology_vector_index()
 
     max_workers = os.cpu_count()
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        futures = [executor.submit(process_ontology, dataset, "bolt://localhost:7687", "neo4j", "password123") for dataset in datasets]
+        futures = [executor.submit(process_ontology, dataset, neo4j_uri, neo4j_user, neo4j_password) for dataset in datasets]
         for future in as_completed(futures):
             try:
                 future.result()

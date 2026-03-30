@@ -23,7 +23,7 @@ Desde la raíz del proyecto:
 
 ```bash
 pip install -r requirements.txt
-````
+```
 
 ## 🚀 Ejecución de la API
 
