@@ -6,9 +6,18 @@ from sentence_transformers import SentenceTransformer
 from neo4j import GraphDatabase
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import os
+import warnings
+import logging
+import hashlib
+
+logging.getLogger("rdflib").setLevel(logging.ERROR)
+warnings.filterwarnings("ignore", category=UserWarning, module="rdflib")
 
 NEO4J_SUMMARY_FOLDER="./summary"
 NEO4J_EMBEDDING_FOLDER="embeddings"
+
+def compute_hash(text):
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 def get_class_name(cls):
     """
@@ -64,22 +73,33 @@ class Neo4jManager:
             else:
                 print("Vector index 'ontology-embeddings' already exists.")
 
-    def store_ontology(self, ontology_id, filename, content, summary, embedding):
-        query = """
-        MERGE (o:Ontology {id: $id})
-        SET o.filename = $filename,
-            o.content = $content,
-            o.summary = $summary,
-            o.embedding = $embedding
-        """
-        self.driver.execute_query(
-            query,
-            id=ontology_id,
-            filename=filename,
-            content=content,
-            summary=summary,
-            embedding=embedding
-        )
+    def store_ontology(self, ontology_id, filename, content, summary, embedding, summary_hash):
+      query = """
+      MERGE (o:Ontology {id: $id})
+      SET o.filename = $filename,
+          o.content = $content,
+          o.summary = $summary,
+          o.summary_hash = $summary_hash,
+          o.embedding = $embedding
+      """
+      self.driver.execute_query(
+          query,
+          id=ontology_id,
+          filename=filename,
+          content=content,
+          summary=summary,
+          summary_hash=summary_hash,
+          embedding=embedding
+      )
+          
+    def get_ontology_hash(self, ontology_id):
+      query = """
+      MATCH (o:Ontology {id: $id})
+      RETURN o.summary_hash AS hash
+      """
+      result = self.driver.execute_query(query, id=ontology_id)
+      record = result.records[0] if result.records else None
+      return record["hash"] if record and record["hash"] else None
 
     # def store_class(self, ontology_id, cls, embedding):
     #     """
@@ -128,22 +148,58 @@ def get_ontology_list(directory="./ontologies"):
             })
 
     return ontologies
+    
+def get_graph_owlready(dataset):
+    """Fallback parser using owlready2 for malformed RDF/XML"""
+    try:
+        import owlready2
+        import tempfile
+        
+        onto = owlready2.get_ontology(f"file://{dataset['path']}").load()
+        
+        # Convert to rdflib graph via a temp NTriples file
+        g = Graph()
+        with tempfile.NamedTemporaryFile(suffix=".nt", delete=False, mode='w') as tmp:
+            tmp_path = tmp.name
+        
+        onto.save(file=tmp_path, format="ntriples")
+        g.parse(tmp_path, format="nt")
+        os.unlink(tmp_path)
+        return g
+        
+    except Exception as e:
+        print(f"⚠️ owlready2 also failed for {dataset['path']}: {e}")
+        return None
 
 def get_graph(dataset):
     g = Graph()
-    try:
-        g.parse(dataset["path"]) #Parse by file path, for format auto-detection
-    except Exception as e:
-        print(f"⚠️ Error parsing {dataset['path']}: {e}")
-        return None
-    return g
+    formats_to_try = [None, "xml", "turtle", "n3", "nt"]
+    
+    for fmt in formats_to_try:
+        try:
+            g = Graph()
+            if fmt is None:
+                g.parse(dataset["path"])
+            else:
+                g.parse(dataset["path"], format=fmt)
+            return g
+        except Exception:
+            continue
+    
+    # Last resort: owlready2
+    print(f"⚠️ Trying owlready2 fallback for {dataset['path']}")
+    return get_graph_owlready(dataset)
 
 def get_preferred_name(g, uri):
-    # 1. rdfs:label
+    # 1. skos:prefLabel
+    for o in g.objects(uri, SKOS.prefLabel):
+        return str(o)
+
+    # 2. rdfs:label
     for o in g.objects(uri, RDFS.label):
         return str(o)
 
-    # 2. QName
+    # 3. fallback
     try:
         return g.qname(uri)
     except Exception:
@@ -151,7 +207,17 @@ def get_preferred_name(g, uri):
 
 
 def get_all_labels(g, uri):
-    return [str(o) for o in g.objects(uri, RDFS.label)]
+    labels = set()
+
+    # rdfs:label
+    for o in g.objects(uri, RDFS.label):
+        labels.add(str(o))
+
+    # skos:prefLabel (label principal en SKOS)
+    for o in g.objects(uri, SKOS.prefLabel):
+        labels.add(str(o))
+
+    return list(labels)
 
 
 def get_comment(g, uri):
@@ -161,10 +227,17 @@ def get_comment(g, uri):
 
 
 def get_synonyms(g, uri):
-    synonyms = []
-    for p in [SKOS.altLabel, SKOS.hiddenLabel]:
-        synonyms.extend(str(o) for o in g.objects(uri, p))
-    return synonyms
+    synonyms = set()
+
+    # skos:altLabel → sinónimos
+    for o in g.objects(uri, SKOS.altLabel):
+        synonyms.add(str(o))
+
+    # opcional: hiddenLabel también como sinónimo
+    for o in g.objects(uri, SKOS.hiddenLabel):
+        synonyms.add(str(o))
+
+    return list(synonyms)
 
 
 def get_individuals_of_class(g, class_uri):
@@ -357,6 +430,9 @@ def summary_to_text(classes_summary):
 
 def process_ontology (dataset, neo4j_url, neo4j_user, neo4j_pwd):
     graph = get_graph(dataset)
+    if graph is None:
+        print(f"⚠️ Skipping {dataset['id']}: graph could not be parsed.")
+        return  # ← add this early return
     id = dataset["id"] #take the name of the ontology as the ID
     manager = Neo4jManager(neo4j_url, neo4j_user, neo4j_pwd)
     try:
@@ -367,16 +443,31 @@ def process_ontology (dataset, neo4j_url, neo4j_user, neo4j_pwd):
 
         with open(summary_path, "w", encoding="utf-8") as file:
             json.dump(classes_summary, file, indent=2, ensure_ascii=False)
-
-        embedding = manager.embedding_model.encode(summary_text,
-                normalize_embeddings=True).tolist() # get embeddings
-
-        manager.store_ontology(  # store embeddings for each of the ontologies
+        
+        summary_hash = compute_hash(summary_text)
+        
+        # ������ comprobar si ya existe y si ha cambiado
+        existing_hash = manager.get_ontology_hash(id)
+        
+        if existing_hash == summary_hash:
+            print(f"⏭️ Skipping {id} (no changes)")
+            return
+        
+        print(f"♻️ Updating {id} (changed or new)")
+        
+        # solo aquí calculas embeddings
+        embedding = manager.embedding_model.encode(
+            summary_text,
+            normalize_embeddings=True
+        ).tolist()
+        
+        manager.store_ontology(
             ontology_id=id,
             filename=dataset["filename"],
             content=dataset["content"],
             summary=json.dumps(classes_summary, ensure_ascii=False),
-            embedding=embedding
+            embedding=embedding,
+            summary_hash=summary_hash
         )
 
         # for cls in classes_summary:
