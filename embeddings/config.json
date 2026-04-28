@@ -1,0 +1,24 @@
+{
+  "labels": [
+    "http://www.w3.org/2004/02/skos/core#prefLabel",
+    "http://www.w3.org/2000/01/rdf-schema#label",
+    "http://schema.org/name",
+    "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P108"
+  ],
+  "synonyms": [
+    "http://www.w3.org/2004/02/skos/core#altLabel",
+    "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
+    "http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym",
+    "http://www.geneontology.org/formats/oboInOwl#hasBroadSynonym",
+    "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
+    "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90",
+    "http://purl.obolibrary.org/obo/IAO_0000118"
+  ],
+  "descriptions": [
+    "http://www.w3.org/2004/02/skos/core#definition",
+    "http://www.w3.org/2000/01/rdf-schema#comment",
+    "http://purl.obolibrary.org/obo/IAO_0000115",
+    "http://purl.org/dc/elements/1.1/description",
+    "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P97"
+  ]
+}
