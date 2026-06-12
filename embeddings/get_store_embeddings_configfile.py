@@ -10,6 +10,7 @@ import os
 import warnings
 import logging
 import hashlib
+from pathlib import Path
 
 logging.getLogger("rdflib").setLevel(logging.ERROR)
 warnings.filterwarnings("ignore", category=UserWarning, module="rdflib")
@@ -447,6 +448,7 @@ def process_ontology(dataset: dict, neo4j_url: str, neo4j_user: str, neo4j_pwd: 
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
     datasets = get_ontology_list()
     print(f"Ontologies found: {len(datasets)}")
 

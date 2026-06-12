@@ -2,7 +2,11 @@ from sentence_transformers import SentenceTransformer
 from neo4j import GraphDatabase
 import numpy as np
 import json
+from dotenv import load_dotenv
+from pathlib import Path
 import os
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 def get_class_name(cls):
     """
