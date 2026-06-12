@@ -63,15 +63,15 @@ The `--reload` flag enables automatic server restart on code changes, which is r
 ---
 
 ## Environment variables
-
+ 
 The following environment variables configure the Neo4j connection. When running with Docker Compose, these are set automatically from the `.env` file in the project root. For manual execution, you can export them in your shell or create a local `.env` file and load it before starting the server:
-
+ 
 ```bash
 export NEO4J_URI=bolt://localhost:7687
 export NEO4J_USER=neo4j
 export NEO4J_PASSWORD=your_password
 ```
-
+ 
 | Variable | Default | Description |
 |---|---|---|
 | `NEO4J_URI` | `bolt://localhost:7687` | Neo4j Bolt connection URI |
