@@ -1,134 +1,88 @@
-# Procesamiento de Ontologías y Almacenamiento de Embeddings en Neo4j
+# Ontology Processing and Embedding Storage in Neo4j
 
-Este proyecto carga ontologías RDF/OWL, extrae su estructura (clases, propiedades, individuos), genera *embeddings* semánticos y los almacena en **Neo4j** utilizando un **índice vectorial** para búsquedas por similitud.
+This module loads RDF/OWL ontologies, extracts their structure, generates semantic embeddings, and stores them in **Neo4j** using a vector index for similarity-based retrieval.
+
+> **Note:** If you are running the full system via Docker Compose, refer to the [main README](../README.md). The instructions below are intended for manual or development setups only.
 
 ---
 
-## Requisitos previos
+## Prerequisites
 
 ### 1. Neo4j
 
-Antes de ejecutar el código es **imprescindible que Neo4j esté instalado y en ejecución**.
+Neo4j must be installed and running before executing this script.
 
-* Neo4j **5.26.6** o superior (necesario para índices vectoriales)
-* Acceso vía **Bolt** (por defecto `bolt://localhost:7687`)
-* Usuario y contraseña válidos
+- Version **5.26.6** or higher (required for vector index support)
+- Bolt access at `bolt://localhost:7687` (default)
+- Valid credentials
 
-Por defecto, el script usa:
+Default connection settings used by the script:
 
-```text
-URI: bolt://localhost:7687
-Usuario: neo4j
-Contraseña: password123
+```
+URI:      bolt://localhost:7687
+User:     neo4j
+Password: password123
 ```
 
-> ⚠️ Ajusta estas credenciales en el código si tu configuración es diferente.
+> Adjust these values in the script if your configuration differs.
 
----
+### 2. Python environment
 
-### 2. Entorno Python
-
-Usar versión Python **3.10**.
-
-Dependencias principales:
-
-* `rdflib`
-* `sentence-transformers`
-* `neo4j`
-
-Ejemplo de instalación:
+Python **3.10** is required. Install dependencies from the project root:
 
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
+
+Key dependencies: `rdflib`, `sentence-transformers`, `neo4j`.
 
 ---
 
-## Estructura de directorios
+## Directory structure
 
-El proyecto espera la siguiente estructura mínima:
-
-```text
-.
-├── embeddings/
-│   └── ontologies/
-│       ├── example.owl
-│       ├── example.ttl
-│       └── example.rdf
-└── README.md
+```
+embeddings/
+├── ontologies/       # Place ontology files here
+│   ├── example.owl
+│   ├── example.ttl
+│   └── example.rdf
+└── get_store_embeddings.py
 ```
 
-### Directorios importantes
-
-#### `/embeddings/ontologies/`
-
-* **Aquí deben colocarse todas las ontologías** que se quieran procesar.
-* Formatos soportados:
-
-  * `.ttl`
-  * `.owl`
-  * `.rdf`
-  * `.xml`
-
-Cada archivo será tratado como una ontología independiente.
+All files placed in `ontologies/` will be processed as independent ontologies. Supported formats: `.ttl`, `.owl`, `.rdf`, `.xml`.
 
 ---
 
-## Qué hace el script
+## What the script does
 
-1. Carga todas las ontologías desde `/embeddings/ontologies/`
-2. Parsea los grafos RDF/OWL con **rdflib**
-3. Extrae:
+1. Loads all ontology files from `ontologies/`
+2. Parses each RDF/OWL graph using **rdflib**
+3. Extracts:
+   - Classes (`owl:Class`) with superclasses and subclasses
+   - Object and data properties
+   - Individuals
+   - Labels, comments, and synonyms
+4. Generates a textual summary of each ontology
+5. Computes embeddings using `sentence-transformers/all-MiniLM-L6-v2`
+6. Creates (or recreates) a **Neo4j vector index** named `ontology-embeddings`
+7. Stores one `:Ontology` node per ontology with fields: `id`, `filename`, `content`, `summary`, `embedding`
 
-   * Clases (`owl:Class`)
-   * Superclases y subclases
-   * Propiedades de objeto y de datos
-   * Individuos
-   * Etiquetas, comentarios y sinónimos
-4. Genera un resumen textual de cada ontología
-5. Calcula *embeddings* usando:
-
-```text
-sentence-transformers/all-MiniLM-L6-v2
-```
-
-6. Crea (o recrea) un **índice vectorial en Neo4j**:
-
-```text
-ontology-embeddings
-```
-
-7. Almacena en Neo4j un nodo `:Ontology` por ontología con:
-
-   * `id`
-   * `filename`
-   * `content`
-   * `summary`
-   * `embedding`
+Processing is parallelised across available CPU cores.
 
 ---
 
-## Ejecución
+## Execution
 
-Una vez:
-
-* Neo4j esté levantado
-* Las ontologías estén en `/embeddings/ontologies/`
-
-Ejecuta:
+Once Neo4j is running and ontology files are in place:
 
 ```bash
-python get_store_embeddings.py
+python get_store_embeddings_configfile.py
 ```
 
-El procesamiento se realiza en **paralelo**, utilizando todos los núcleos disponibles de la CPU.
-
 ---
 
-## Notas adicionales
+## Notes
 
-* Si una ontología no puede parsearse, se mostrará un aviso y se omitirá.
-* El código incluye (comentada) la lógica para almacenar también clases individuales como nodos separados en Neo4j.
-* Los embeddings se normalizan para mejorar la calidad de la similitud coseno.
-
----
+- Ontologies that cannot be parsed are skipped with a warning.
+- Embeddings are L2-normalised to improve cosine similarity quality.
+- The script includes commented-out logic to store individual classes as separate Neo4j nodes, which can be enabled if finer-grained retrieval is needed.
