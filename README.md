@@ -1,48 +1,98 @@
+# RAG annotation API
 
-# OntonNG RAG annotation API
-
-## ⚠️ Requisitos previos
-
-Antes de ejecutar esta API, es **imprescindible** seguir los pasos de procesamiento de embeddings descritos en el proyecto de ontologías:
-
-[Procesamiento de Ontologías y Almacenamiento de Embeddings en Neo4j](./embeddings/README.md)
-
-En resumen:
-
-1. Neo4j debe estar instalado y en ejecución (versión ≥ 5.26.6)  
-2. Las ontologías deben colocarse en `/embeddings/ontologies/`  
-3. Ejecutar `python get_store_embeddings.py` para generar y almacenar los embeddings en Neo4j  
-
-> La API depende de estos embeddings para poder realizar búsquedas semánticas.
+A REST API for semantic annotation of biomedical samples using Retrieval-Augmented Generation (RAG) over ontologies stored in a Neo4j vector database. The system retrieves ontology classes semantically similar to a given input label and uses a language model to assign the most appropriate annotation.
 
 ---
 
-## 📦 Instalación de dependencias
+## Requirements
 
-Desde la raíz del proyecto:
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+
+No additional local dependencies are required. All services run inside containers.
+
+---
+
+## Project structure
+
+```
+RAGannotationAPI/
+├── api/                  # FastAPI application
+│   ├── Dockerfile
+│   ├── main.py
+│   └── README.md         # Manual execution instructions
+├── embeddings/           # Embedding generation scripts and ontologies
+│   ├── ontologies/       # Place ontology files here (.ttl, .owl, .rdf, .xml)
+│   ├── get_store_embeddings.py
+│   └── README.md         # Manual execution instructions
+├── neo4j/                # Neo4j data volume (auto-generated)
+├── docker-compose.yml
+└── requirements.txt
+```
+
+---
+
+## Quick start
+
+### 1. Add ontologies
+
+Place the ontology files to be indexed in `embeddings/ontologies/`. Supported formats: `.ttl`, `.owl`, `.rdf`, `.xml`.
+
+### 2. Start the services
 
 ```bash
-pip install -r requirements.txt
+docker compose up -d
 ```
 
-## 🚀 Ejecución de la API
+This starts two services:
 
-Para ejecutar la API correctamente, **debes situarte en el directorio `/api`**:
+| Service | Description | Ports |
+|---|---|---|
+| `api` | FastAPI REST API | `8000` |
+| `neo4j` | Neo4j graph database | `7474` (browser), `7687` (Bolt) |
+
+### 3. Load embeddings into Neo4j
+
+This step must be run once before the API can serve requests. It parses the ontologies, generates semantic embeddings, and stores them in Neo4j.
 
 ```bash
-cd api
+docker compose exec api sh -c "cd /embeddings && python get_store_embeddings.py"
 ```
 
-Luego ejecuta el servidor con el siguiente comando:
+> ⚠️ Make sure the Neo4j container is fully started before running this command. You can verify it at `http://localhost:7474`.
+
+### 4. Access the API
+
+The API is available at:
+
+```
+http://localhost:8000
+```
+
+Interactive API documentation (Swagger UI) is available at:
+
+```
+http://localhost:8000/docs
+```
+
+---
+
+## Stopping the services
 
 ```bash
-uvicorn main:app --reload
+docker compose down
 ```
 
-La API estará disponible por defecto en:
+To also remove the Neo4j data volume:
 
-```
-http://127.0.0.1:8000
+```bash
+docker compose down -v
 ```
 
-El parámetro `--reload` habilita la recarga automática del servidor cuando se detectan cambios en el código, ideal para desarrollo.
+---
+
+## Manual execution (without Docker)
+
+For local development without Docker, refer to the individual component documentation:
+
+- [Embedding generation](./embeddings/README.md)
+- [API server](./api/README.md)
