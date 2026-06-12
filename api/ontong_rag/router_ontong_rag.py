@@ -1,7 +1,7 @@
 import re
 from typing import List, Dict, Any, Tuple, Optional
 from neo4j_manager import manager
-from fastapi import HTTPException,Query,APIRouter
+from fastapi import HTTPException,Form,APIRouter
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from neo4j.exceptions import (
@@ -954,23 +954,19 @@ def build_semantic_mapping_from_entities(
         )
     return mapping
 
-@router.get("/similar-ontologies")
-def ontology_similarity(
-        top_k: int = Query(5, ge=1, le=100, description="Maximum number of similar ontologies to retrieve (1–100)."),
-        blacklist: Optional[str] = Query(
-            None,
-            description="Comma-separated list of ontology IDs to exclude. If omitted or empty, no ontology is excluded."
-        ),
-        description_text: Optional[str] = Query(None, description=(
-                "Free-text or PlantUML description of what you are looking for.\n"
-                "Examples:\n"
-                "- 'temperature unit'\n"
-                "- 'person profile ontology'\n"
-                "- Or a full PlantUML model (@startuml ... @enduml).\n"
-                "\n"
-                "The text is embedded and compared against ontology embeddings."
-        ),
-                                                )
+@router.post("/similar-ontologies")
+async def ontology_similarity(
+    top_k: int = Form(5, ge=1, le=100, description="Maximum number of similar ontologies to retrieve (1–100)."),
+    blacklist: Optional[str] = Form(None, description="Comma-separated list of ontology IDs to exclude. If omitted or empty, no ontology is excluded."),
+    description_text: Optional[str] = Form(None, description=(
+        "Free-text or PlantUML description of what you are looking for.\n"
+        "Examples:\n"
+        "- 'temperature unit'\n"
+        "- 'person profile ontology'\n"
+        "- Or a full PlantUML model (@startuml ... @enduml).\n"
+        "\n"
+        "The text is embedded and compared against ontology embeddings."
+    )),
 ):
     """
     This endpoint computes the most similar ontologies for a given textual or PlantUML
@@ -1035,49 +1031,30 @@ def ontology_similarity(
     }
 
 
-@router.get("/similar-entities")
-def entities_similar(
-    description_text: Optional[str] = Query(
-        None,
-        description=(
-            "Input describing entities (classes or individuals).\n"
-            "Supported formats:\n"
-            "- PlantUML model with classes/entities (@startuml ... @enduml).\n"
-            "- Free-text list of entity names, e.g.:\n"
-            "    'Person, Workplace, Skill'\n"
-            "    'John, Company, Temperature'\n"
-            "    or one per line:\n"
-            "    Person\\nWorkplace\\nSkill\n"
-            "\n"
-            "Each entity name is semantically mapped to ontology classes/individuals."
-        ),
-    ),
-    ontology_ids: str = Query(
-        None,
-        description="One or more ontology IDs, as a comma-separated string, used as search space.",
-    ),
-    top_class_per_entity: int = Query(
-        1,
-        ge=1,
-        le=10,
-        description=(
-            "Maximum number of top ontology candidates (classes or individuals) "
-            "to return per input entity (1–10)."
-        ),
-    ),
-    score_threshold: float = Query(
-        0.5,
-        ge=0.1,
-        le=1,
-        description=(
-            "Minimum similarity score (0.1–1.0) required for a class to be included "
-            "in the returned context."
-        ),
-    ),
-    context: bool = Query(
-        False,
-        description="If true, include ontology class context in the response.",
-    ),
+@router.post("/similar-entities")
+async def entities_similar(
+    description_text: Optional[str] = Form(None, description=(
+        "Input describing entities (classes or individuals).\n"
+        "Supported formats:\n"
+        "- PlantUML model with classes/entities (@startuml ... @enduml).\n"
+        "- Free-text list of entity names, e.g.:\n"
+        "    'Person, Workplace, Skill'\n"
+        "    'John, Company, Temperature'\n"
+        "    or one per line:\n"
+        "    Person\\nWorkplace\\nSkill\n"
+        "\n"
+        "Each entity name is semantically mapped to ontology classes/individuals."
+    )),
+    ontology_ids: Optional[str] = Form(None, description="One or more ontology IDs, as a comma-separated string, used as search space."),
+    top_class_per_entity: int = Form(1, ge=1, le=10, description=(
+        "Maximum number of top ontology candidates (classes or individuals) "
+        "to return per input entity (1–10)."
+    )),
+    score_threshold: float = Form(0.5, ge=0.1, le=1.0, description=(
+        "Minimum similarity score (0.1–1.0) required for a class to be included "
+        "in the returned context."
+    )),
+    context: bool = Form(False, description="If true, include ontology class context in the response."),
 ):
     """
     This endpoint maps input entities to the most semantically similar ontology classes
@@ -1221,39 +1198,34 @@ def entities_similar(
 
     return response
 
-@router.get("/similar-relations")
-def similar_relation (
-    description_text: Optional[str] = Query(None, description=(
-            "Input describing relationships between entities.\n"
-            "Supported formats:\n"
-            "- PlantUML model with associations (@startuml ... @enduml), e.g.:\n"
-            "    Person \"1\" -- \"0..*\" Workplace : works_at\n"
-            "- Free-text descriptions of relations, e.g.:\n"
-            "    'Person works at Workplace; Person has_skill Skill'\n"
-            "    or one per line."
-        ),
-    ),
-    ontology_ids: str = Query(None, description=(
-            "One or more ontology IDs, provided as a comma-separated string. "
-            "Each ontology is processed independently.\n"
-            "Example: 'BASO,BASF_UNITS'."
-        ),
-    ),
-    top_property_per_relation: int = Query(1, ge=1, le=10, description=(
-            "Maximum number of top matching ontology object properties "
-            "to return per detected relation."
-        ),
-    ),
-    topk_index: int = Query(30, ge=5, le=200, description=(
-            "Number of top candidates considered in the vector search over "
-            "ontology relations before aggregation (5–200)."
-        ),
-    ),
-    score_threshold: float = Query(0.0, ge=0.0, le=1.0, description=(
-            "Minimum similarity score required to include a relationship in the results. "
-            "If set to 0.0, no score-based filtering is applied."
-        ),
-    )
+@router.post("/similar-relations")
+async def similar_relation(
+    description_text: Optional[str] = Form(None, description=(
+        "Input describing relationships between entities.\n"
+        "Supported formats:\n"
+        "- PlantUML model with associations (@startuml ... @enduml), e.g.:\n"
+        "    Person \"1\" -- \"0..*\" Workplace : works_at\n"
+        "- Free-text descriptions of relations, e.g.:\n"
+        "    'Person works at Workplace; Person has_skill Skill'\n"
+        "    or one per line."
+    )),
+    ontology_ids: Optional[str] = Form(None, description=(
+        "One or more ontology IDs, provided as a comma-separated string. "
+        "Each ontology is processed independently.\n"
+        "Example: 'BASO,BASF_UNITS'."
+    )),
+    top_property_per_relation: int = Form(1, ge=1, le=10, description=(
+        "Maximum number of top matching ontology object properties "
+        "to return per detected relation."
+    )),
+    topk_index: int = Form(30, ge=5, le=200, description=(
+        "Number of top candidates considered in the vector search over "
+        "ontology relations before aggregation (5–200)."
+    )),
+    score_threshold: float = Form(0.0, ge=0.0, le=1.0, description=(
+        "Minimum similarity score required to include a relationship in the results. "
+        "If set to 0.0, no score-based filtering is applied."
+    )),
 ):
 
     """
