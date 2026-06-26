@@ -283,7 +283,7 @@ Response fields per ontology:
 async def annotate_columns(
     file: UploadFile = File(...),
     top_class_per_entity: Annotated[int, Field(ge=1, le=10)] = Form(1),
-    ontology_ids: Optional[str] = Form(None),
+    ontology_ids: str = Form(""),
     top_n: int = Form(2),
     score_threshold: Annotated[float, Field(ge=0.1, le=1.0)] = Form(0.5),
     context: bool = Form(False),
@@ -368,7 +368,7 @@ async def annotate_rows(
     file: UploadFile = File(...),
     column_name: str = Form(...),
     top_class_per_entity: Annotated[int, Field(ge=1, le=10)] = Form(1),
-    ontology_ids: Optional[str] = Form(None),
+    ontology_ids: str = Form(""),
     top_n: int = Form(2),
     score_threshold: Annotated[float, Field(ge=0.1, le=1.0)] = Form(0.5),
     include_individuals: bool = Form(False, description="If True, includes ranked individuals of each matched class."),

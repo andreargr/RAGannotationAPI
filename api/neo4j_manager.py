@@ -359,6 +359,96 @@ class Neo4jManager:
             },
         }
 
+    def find_ontologies_covering_classes(
+            self,
+            class_names: list[str],
+            model_key: str,
+            score_threshold: float = 0.8,
+            top_k_matches_per_class: int = 20,
+    ) -> dict:
+        """
+        For each input class name (e.g. extracted from a PlantUML diagram), find
+        every ontology class whose embedding scores >= score_threshold against it.
+
+        Unlike find_ontologies_by_class_similarity (which collapses to a single
+        best-matching ontology ranked by score), this method is built to answer
+        "which ontologies cover this set of classes, and how many of them".
+
+        All input class names are encoded in a single batched call, then a single
+        Cypher query (UNWIND over the input classes) compares each input
+        embedding against every ClassEmbedding node and keeps matches above
+        score_threshold, capped per input class by top_k_matches_per_class.
+
+        Returns
+        -------
+        dict with:
+          - "matches_by_input_class": dict mapping each input class_name to a list
+            of {ontology_id, class_id, labels, score} sorted by score desc.
+          - "timing": {encoding_seconds, search_seconds, total_seconds}
+        """
+        label = MODEL_REGISTRY[model_key].class_label
+
+        if not class_names:
+            return {
+                "matches_by_input_class": {},
+                "timing": {"encoding_seconds": 0.0, "search_seconds": 0.0, "total_seconds": 0.0},
+            }
+
+        with _timer() as enc_t:
+            embeddings = self._encode(model_key, class_names)
+            # Build the UNWIND payload: one row per input class name + its embedding.
+            query_rows = [
+                {"name": name, "embedding": emb.tolist()}
+                for name, emb in zip(class_names, embeddings)
+            ]
+
+        with _timer() as search_t:
+            result = self._driver.execute_query(
+                f"""
+                UNWIND $rows AS row
+                MATCH (ce:{label})
+                WITH row, ce,
+                     vector.similarity.cosine(ce.vector, row.embedding) AS score
+                WHERE score >= $score_threshold
+                WITH row.name AS input_class, ce, score
+                ORDER BY input_class, score DESC
+                WITH input_class, collect({{
+                    ontology_id: ce.ontology_id,
+                    class_id: ce.class_id,
+                    labels: ce.labels,
+                    score: score
+                }})[0..$top_k_matches_per_class] AS matches
+                RETURN input_class, matches
+                """,
+                rows=query_rows,
+                score_threshold=score_threshold,
+                top_k_matches_per_class=top_k_matches_per_class,
+            )
+            matches_by_input_class: dict[str, list[dict]] = {
+                r["input_class"]: [
+                    {
+                        "ontology_id": m["ontology_id"],
+                        "class_id": m["class_id"],
+                        "labels": m.get("labels", []),
+                        "score": round(m["score"], 4),
+                    }
+                    for m in r["matches"]
+                ]
+                for r in result.records
+            }
+            # Ensure every input class name is present, even with no matches.
+            for name in class_names:
+                matches_by_input_class.setdefault(name, [])
+
+        return {
+            "matches_by_input_class": matches_by_input_class,
+            "timing": {
+                "encoding_seconds": enc_t["seconds"],
+                "search_seconds": search_t["seconds"],
+                "total_seconds": round(enc_t["seconds"] + search_t["seconds"], 4),
+            },
+        }
+
 
 manager = Neo4jManager(
     uri=os.environ.get("NEO4J_URI", "bolt://localhost:7687"),

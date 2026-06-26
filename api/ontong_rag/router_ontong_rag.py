@@ -3,16 +3,6 @@
 router_ontong_rag.py
 ====================
 FastAPI router for ontology similarity search endpoints.
-
-Arquitectura de 'local' (embeddings de clase precalculados en Neo4j, cache de
-modelo en el manager, busqueda en 2 etapas, model_key, timing) PERO:
-  - Endpoints POST + Form (contrato como en produccion, no GET/Query).
-  - Con los fixes de data properties portados desde el router de produccion:
-      * parse_plantuml_class_attributes tolerante a saltos perdidos (finditer)
-      * normalize_multiline endurecida (caso mixto)
-      * datatypes fuera del texto matchable (_is_datatype)
-      * query de atributo sin el tipo
-      * filtro de compatibilidad de tipo (_norm_dtype) en data properties
 """
 
 from __future__ import annotations
@@ -542,135 +532,175 @@ def rank_individuals_by_similarity(
 
 @router.post("/similar-ontologies")
 def ontology_similarity(
-    top_k: int = Form(5, ge=1, le=100, description="Maximum number of similar ontologies to retrieve (1-100)."),
+    minimum_class_coverage: int = Form(
+        1, ge=1,
+        description="Minimum number of input PlantUML classes an ontology must cover to be returned.",
+    ),
+    top_k: Optional[int] = Form(
+            None, ge=1, le=100,
+            description=(
+                "Optional cap on how many ontologies to return, applied AFTER the "
+                "coverage filter. Useful when many ontologies tie on coverage; the "
+                "best-scoring ones are kept. If omitted, all matching ontologies are returned."
+            ),
+    ),
     blacklist: Optional[str] = Form(None, description="Comma-separated list of ontology IDs to exclude."),
-    description_text: Optional[str] = Form(None, description="Free-text or PlantUML description."),
+    description_text: Optional[str] = Form(None, description="PlantUML diagram (@startuml ... @enduml) with at least one class/entity "
+        "block."),
+    search_mode: str = Form(
+            "per_class",
+            description="'per_class' (coverage by PlantUML class) or 'ontology' (similarity against each ontology's summary embedding).",
+    ),
     model_key: str = Form("minilm", description="Embedding model to use."),
     timing: bool = Form(False, description="If True, includes timing breakdown in the response."),
     class_score_threshold: float = Form(
         0.8, ge=0.0, le=1.0,
         description=(
-            "Minimum cosine similarity for the class-level search stage. "
-            "If no class meets this threshold, the search falls back to "
-            "ontology-level automatically."
+            "Minimum cosine similarity for a PlantUML class to count as covered by an ontology class."
         ),
+    ),
+    include_class_matches: bool = Form(
+        False,
+        description="Include PlantUML class -> ontology class mappings."
     ),
 ):
     """
-This endpoint recommends the most semantically similar ontologies for a given input
-text, ranking them by how closely their content matches the query.
+Recommends ontologies for the input PlantUML, with two selectable modes (`search_mode`):
 
-Search is performed in two sequential stages:
+- `"per_class"` (default): the diagram is split into classes and each ontology
+  is ranked by how many input classes it covers (a class counts as covered
+  when some ontology class reaches `class_score_threshold`); ties broken by
+  best class score. Items: {ontologyId, covered_classes_count, (class_matches)}.
 
-- Stage 1 (class-level): the input text is compared against the pre-computed
-  embedding of every individual class stored in Neo4j, across all ontologies
-  simultaneously. Ontologies are ranked by the score of their best matching class.
-  This stage is precise for specific terms (e.g. "Cell", "hasParticipant") because
-  a single highly relevant class is enough to surface the ontology, regardless of
-  how broad the ontology is overall. If at least one class meets the
-  `class_score_threshold`, results are returned from this stage and Stage 2 is
-  skipped.
+- `"ontology"`: similarity of the whole input against each ontology's summary
+  embedding. Items: {ontologyId, filename, score}.
 
-- Stage 2 (ontology-level fallback): only triggered when Stage 1 returns no results
-  above `class_score_threshold`. The input text is compared against a single
-  pre-computed vector that summarises the entire ontology (all class labels,
-  comments, and property names concatenated). This works well for broad topic
-  queries (e.g. "cell biology", "industrial process") where no single class is a
-  strong match but the ontology as a whole is relevant.
+Only PlantUML input is accepted; free text is rejected with HTTP 400.
 
-The field `search_mode_used` in the response indicates which stage produced the
-final results ('class' or 'ontology'), allowing the caller to interpret scores
-and result structure accordingly.
+Parameters:
+- `description_text`: PlantUML diagram (@startuml ... @enduml).
+- `search_mode`: "per_class" or "ontology".
+- `minimum_class_coverage`: (per_class only) min input classes an ontology must cover.
+- `top_k`: cap on results. Optional in per_class (None = all); in ontology mode
+    it bounds the vector search (defaults to 10 if omitted).
+- `class_score_threshold`: (per_class only) min cosine for a class to be covered.
+- `include_class_matches`: (per_class only) include per-class matches.
+- `blacklist`: comma-separated ontology IDs to exclude.
+- `model_key`: embedding model; must match ingestion.
+- `timing`: include timing breakdown.
 
-The input may be:
-- Plain free text (keywords, terms, short descriptions).
-- A complete PlantUML diagram, embedded as a single query string.
-
-PlantUML detection is heuristic and used only to generate warnings; it does not
-change how the input is embedded in this endpoint.
-
-Parameters info:
-- `description_text`: Raw input text (plain text or PlantUML) used as the query.
-- `top_k`: Maximum number of ontology candidates to return (1–100).
-- `class_score_threshold`: Minimum cosine similarity (0.0–1.0) required for a
-  class-level match to be accepted in Stage 1. If no class meets this threshold,
-  the search falls back to Stage 2 automatically. Higher values enforce stricter
-  exact-term matching before falling back; lower values make the fallback less
-  likely to trigger. Default is 0.8.
-- `blacklist`: Optional comma-separated list of ontology IDs to exclude from results
-  while preserving the ranking of remaining ontologies.
-- `model_key`: Embedding model to use ('biolord' or 'minilm'). Must match the model
-  used during ingestion for meaningful similarity scores.
-- `timing`: If True, includes a timing breakdown in the response.
-
-Usage logic:
-- The input is analyzed via `analyze_input_text` to detect PlantUML and produce
-  warnings.
-- Stage 1: the input text is encoded and compared against all class embeddings in
-  Neo4j via `manager.find_ontologies_by_class_similarity`, filtered by
-  `class_score_threshold`. Each result contains `ontologyId` and
-  `best_matching_class` (with `class_id`, `labels`, and `score`).
-- Stage 2 (fallback): if Stage 1 returns no results, the input text is encoded and
-  queried against the Neo4j ontology-level vector index via
-  `manager.find_most_similar_ontology`. Each result contains `ontologyId`,
-  `filename`, and `score`.
-- If `blacklist` is provided, matching ontology IDs are removed from the final
-  results regardless of which stage produced them.
-
-Timing breakdown:
-- `encoding_seconds`: time to encode the input query text using the sentence
-  transformer. If Stage 2 is triggered, this reflects the cost of the fallback
-  encoding call, as Stage 1 and Stage 2 encode independently.
-- `search_seconds`: time for the Neo4j vector search of whichever stage produced
-  the final results.
-- `total_seconds`: sum of the above.
-"""
+Response:
+- `search_mode_used`: "per_class" or "ontology" (item shape depends on it).
+- `results`, `is_plantuml`, `entities_count`, `relations_count`, `warnings`.
+    """
     validate_model_key(model_key)
     query_text, analysis = analyze_input_text(description_text)
 
-    try:
-        # Stage 1: class-level
-        response_data = manager.find_ontologies_by_class_similarity(
-            query_text=query_text,
-            model_key=model_key,
-            top_k_ontologies=top_k,
-            score_threshold=class_score_threshold,
+    if not analysis["is_plantuml"] or analysis["entities_count"] == 0:
+        raise HTTPException(
+            status_code=400,
+            detail=("This endpoint only accepts PlantUML input with at least one "
+                    "recognizable class/entity block."),
         )
-        mode_used = "class"
 
-        # Stage 2: fallback ontology-level
-        if not response_data["results"]:
+    blacklist_ids = {x.strip() for x in blacklist.split(",")} if blacklist else set()
+
+    if search_mode not in ("per_class", "ontology"):
+        raise HTTPException(status_code=400, detail="search_mode must be 'per_class' or 'ontology'.")
+
+    # ----- MODO ONTOLOGIA  -----
+    if search_mode == "ontology":
+        try:
             response_data = manager.find_most_similar_ontology(
                 input_text=query_text,
                 model_key=model_key,
-                top_k=top_k,
+                top_k=top_k if top_k is not None else 10,
             )
-            mode_used = "ontology"
+        except Neo4jError as e:
+            raise_neo4j_http(e)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Unexpected error while querying Neo4j: {e}")
 
+        results = [o for o in response_data["results"] if o["ontologyId"] not in blacklist_ids]
+        result: dict = {
+            "search_mode_used": "ontology",
+            "is_plantuml": analysis["is_plantuml"],
+            "entities_count": analysis["entities_count"],
+            "relations_count": analysis["relations_count"],
+            "warnings": analysis["warnings"],
+            "results": results,
+        }
+        if timing:
+            result["timing"] = response_data["timing"]
+        return result
+
+    # ----- MODO PER_CLASS (cobertura) -----
+    entities = parse_plantuml_entities(query_text)
+    class_names = list(entities.keys())
+
+    try:
+        response_data = manager.find_ontologies_covering_classes(
+            class_names=class_names,
+            model_key=model_key,
+            score_threshold=class_score_threshold,
+        )
     except Neo4jError as e:
         raise_neo4j_http(e)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error while querying Neo4j: {e}")
 
-    top_ontologies = response_data["results"]
-    if not top_ontologies:
-        raise HTTPException(status_code=400, detail="No ontology embeddings were found in Neo4j.")
+    matches_by_input_class = response_data["matches_by_input_class"]
 
-    blacklist_ids = {x.strip() for x in blacklist.split(",")} if blacklist else set()
+    # Aggregate per ontology: which input classes does it cover, and with what matches.
+    per_ontology: dict[str, dict] = {}
+    for input_class, matches in matches_by_input_class.items():
+        for m in matches:
+            oid = m["ontology_id"]
+            bucket = per_ontology.setdefault(oid, {"covered": {}, "best_score": 0.0})
+            covered_for_class = bucket["covered"].setdefault(input_class, [])
+            covered_for_class.append({
+                "class_id": m["class_id"],
+                "labels": m["labels"],
+                "score": m["score"],
+            })
+            bucket["best_score"] = max(bucket["best_score"], m["score"])
+    ranked = sorted(
+        per_ontology.items(),
+        key=lambda kv: (-len(kv[1]["covered"]), -kv[1]["best_score"]),
+    )
+
+    top_ontologies = []
+    for oid, data in ranked:
+        if len(data["covered"]) < minimum_class_coverage:
+            continue
+        entry = {
+            "ontologyId": oid,
+            "covered_classes_count": len(data["covered"]),
+        }
+        if include_class_matches:
+            entry["class_matches"] = [
+                {"input_class": input_class, "matches": matches}
+                for input_class, matches in data["covered"].items()
+            ]
+        top_ontologies.append(entry)
+
+    top_ontologies = [o for o in top_ontologies if o["ontologyId"] not in blacklist_ids]
+
+    if top_k is not None:
+        top_ontologies = top_ontologies[:top_k]
 
     result: dict = {
         # "model_key": model_key,
-        "search_mode_used": mode_used,
+        "search_mode_used": "per_class",
         "is_plantuml": analysis["is_plantuml"],
         "entities_count": analysis["entities_count"],
         "relations_count": analysis["relations_count"],
         "warnings": analysis["warnings"],
-        "results": [o for o in top_ontologies if o["ontologyId"] not in blacklist_ids],
+        "results": top_ontologies,
     }
     if timing:
         result["timing"] = response_data["timing"]
     return result
-
 
 @router.post("/similar-entities")
 def entities_similar(
