@@ -15,10 +15,14 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Generator, Optional
+from pathlib import Path
+from dotenv import load_dotenv
 
 import numpy as np
 from neo4j import GraphDatabase
 from sentence_transformers import SentenceTransformer
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 logger = logging.getLogger(__name__)
 logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
@@ -451,7 +455,7 @@ class Neo4jManager:
 
 
 manager = Neo4jManager(
-    uri=os.environ.get("NEO4J_URI", "bolt://localhost:7687"),
+    uri=os.environ.get("NEO4J_URI", "bolt://neo4j-v2:7687"),
     user=os.environ.get("NEO4J_USER", "neo4j"),
-    password=os.environ.get("NEO4J_PASSWORD", "password123"),
+    password=os.environ.get("NEO4J_PASSWORD", "password"),
 )
